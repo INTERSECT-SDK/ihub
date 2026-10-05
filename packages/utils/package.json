@@ -1,0 +1,42 @@
+{
+  "name": "@ihub/utils",
+  "version": "0.0.0",
+  "private": true,
+  "exports": {
+    "./types/*": "./src/types/*.ts",
+    "./icons": "./src/icons/icons.tsx",
+    "./hooks/*": "./src/types/*.tsx",
+    "./helpers/*": "./src/helpers/*.ts"
+  },
+  "scripts": {
+    "check-types": "node scripts/generate-campaign-contract.mjs --check && tsc --noEmit",
+    "check:campaign-contract": "node scripts/generate-campaign-contract.mjs --check",
+    "generate:component": "turbo gen react-component",
+    "generate:campaign-contract": "node scripts/generate-campaign-contract.mjs",
+    "format": "prettier --config .prettierrc --write ./src",
+    "lint": "eslint --fix ./src"
+  },
+  "devDependencies": {
+    "@repo/eslint-config": "workspace:*",
+    "@repo/typescript-config": "workspace:*",
+    "@types/node": "^24.10.2",
+    "@types/plotly.js": "^3.0.10",
+    "@types/react": "19.2.7",
+    "@types/react-dom": "19.2.3",
+    "eslint": "^9.39.1",
+    "json-schema-to-typescript": "16.0.0",
+    "prettier": "^3.7.4",
+    "typescript": "5.9.3"
+  },
+  "dependencies": {
+    "@langchain/core": "^1.1.4",
+    "@tabler/icons-react": "^3.35.0",
+    "@xyflow/react": "^12.10.0",
+    "install": "^0.13.0",
+    "plotly.js-dist": "^3.4.0",
+    "react": "^19.2.1",
+    "react-dom": "^19.2.1",
+    "uuid": "^13.0.0",
+    "vega": "^6.2.0"
+  }
+}

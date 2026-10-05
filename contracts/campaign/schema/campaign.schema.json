@@ -1,0 +1,466 @@
+{
+  "$defs": {
+    "Input": {
+      "description": "Input for a task.\n\nAttributes:\n    json_schema: The schema for the input.\n    values: The values for the input.",
+      "properties": {
+        "schema": {
+          "additionalProperties": true,
+          "title": "Schema",
+          "type": "object"
+        },
+        "values": {
+          "items": {
+            "$ref": "#/$defs/Value"
+          },
+          "minItems": 1,
+          "title": "Values",
+          "type": "array"
+        }
+      },
+      "required": [
+        "schema",
+        "values"
+      ],
+      "title": "Input",
+      "type": "object"
+    },
+    "MaxRuntime": {
+      "description": "Maximum runtime for an objective.\n\nAttributes:\n    id: The ID for the max runtime.\n    max_time: Time duration as ISO 8601 format.\n    task_group: The task group for this objective.",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "max_time": {
+          "format": "duration",
+          "title": "Max Time",
+          "type": "string"
+        },
+        "task_group": {
+          "title": "Task Group",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "max_time",
+        "task_group"
+      ],
+      "title": "MaxRuntime",
+      "type": "object"
+    },
+    "Objective": {
+      "description": "Objective for the campaign.\n\nAttributes:\n    max_runtime: Max allowed runtime for a task group.\n    threshold: Thresholds for a task group.",
+      "properties": {
+        "max_runtime": {
+          "items": {
+            "$ref": "#/$defs/MaxRuntime"
+          },
+          "title": "Max Runtime",
+          "type": "array"
+        },
+        "threshold": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ThresholdUpperLimit"
+              },
+              {
+                "$ref": "#/$defs/ThresholdRange"
+              }
+            ]
+          },
+          "title": "Threshold",
+          "type": "array"
+        }
+      },
+      "title": "Objective",
+      "type": "object"
+    },
+    "ObjectiveAssert": {
+      "description": "Assertion for objectives.\n\nAttributes:\n    id: The ID for the assertion objective.\n    type: The type of assertion.\n    var: The variable for the assertion.\n    target: The target boolean.",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "target": {
+          "title": "Target",
+          "type": "boolean"
+        },
+        "type": {
+          "title": "Type",
+          "type": "string"
+        },
+        "var": {
+          "title": "Var",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "var",
+        "target"
+      ],
+      "title": "ObjectiveAssert",
+      "type": "object"
+    },
+    "ObjectiveIterate": {
+      "description": "Iterations for an objective.\n\nAttributes:\n    id: The ID for the iterations.\n    type: The type of iteration.\n    iterations: The number of iterations for the objective.",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "iterations": {
+          "title": "Iterations",
+          "type": "integer"
+        },
+        "type": {
+          "title": "Type",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "type",
+        "iterations"
+      ],
+      "title": "ObjectiveIterate",
+      "type": "object"
+    },
+    "Output": {
+      "description": "Output for a task.\n\nAttributes:\n    json_schema: The schema for the output.\n    values: The values for the output.",
+      "properties": {
+        "schema": {
+          "additionalProperties": true,
+          "title": "Schema",
+          "type": "object"
+        },
+        "values": {
+          "items": {
+            "$ref": "#/$defs/Value"
+          },
+          "minItems": 1,
+          "title": "Values",
+          "type": "array"
+        }
+      },
+      "required": [
+        "schema",
+        "values"
+      ],
+      "title": "Output",
+      "type": "object"
+    },
+    "Task": {
+      "description": "An individual task in a task group.\n\nAttributes:\n    id: The ID for the task.\n    hierarchy: The hierarchy of the task.\n    capability: The Capability of the task.\n    operation_id: Operation of the task. Mutually exclusive with event_name.\n    event_name: Name of the event to listen to. Mutually exclusive with operation_id.\n    output: The optional output value for the task. If not defined, assume no output beyond generic INTERSECT metadata.\n    input: The optional input value for the task. If not defined, assume no input.\n    task_dependencies: Dependencies on other tasks.\n    task_objectives: Objectives for the task.",
+      "properties": {
+        "capability": {
+          "title": "Capability",
+          "type": "string"
+        },
+        "event_count": {
+          "anyOf": [
+            {
+              "type": "integer"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Event Count"
+        },
+        "event_mode": {
+          "default": "once",
+          "enum": [
+            "once",
+            "count",
+            "persistent"
+          ],
+          "title": "Event Mode",
+          "type": "string"
+        },
+        "event_name": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Event Name"
+        },
+        "hierarchy": {
+          "title": "Hierarchy",
+          "type": "string"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "input": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Input"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "operation_id": {
+          "anyOf": [
+            {
+              "type": "string"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null,
+          "title": "Operation Id"
+        },
+        "output": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Output"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        },
+        "task_dependencies": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Task Dependencies",
+          "type": "array"
+        },
+        "task_objectives": {
+          "anyOf": [
+            {
+              "$ref": "#/$defs/Objective"
+            },
+            {
+              "type": "null"
+            }
+          ],
+          "default": null
+        }
+      },
+      "required": [
+        "id",
+        "hierarchy",
+        "capability"
+      ],
+      "title": "Task",
+      "type": "object"
+    },
+    "TaskGroup": {
+      "description": "Task group.\n\nAttributes:\n    id: The ID for the task group.\n    group_dependencies: Dependencies on other task groups.\n    task: The tasks that make up the task group.\n    objectives: The objectives for the task group.",
+      "properties": {
+        "group_dependencies": {
+          "items": {
+            "type": "string"
+          },
+          "title": "Group Dependencies",
+          "type": "array"
+        },
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "objectives": {
+          "items": {
+            "anyOf": [
+              {
+                "$ref": "#/$defs/ObjectiveAssert"
+              },
+              {
+                "$ref": "#/$defs/ObjectiveIterate"
+              }
+            ]
+          },
+          "title": "Objectives",
+          "type": "array"
+        },
+        "tasks": {
+          "items": {
+            "$ref": "#/$defs/Task"
+          },
+          "title": "Tasks",
+          "type": "array"
+        }
+      },
+      "required": [
+        "id"
+      ],
+      "title": "TaskGroup",
+      "type": "object"
+    },
+    "ThresholdRange": {
+      "description": "Range threshold for the objective.\n\nAttributes:\n    id: The ID for the range.\n    var: The variable associated with the objective.\n    type: The type of threshold.\n    target: The target value.\n    task_group: The task group for this objective.",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "target": {
+          "exclusiveMaximum": 3.14,
+          "exclusiveMinimum": 1.62,
+          "title": "Target",
+          "type": "number"
+        },
+        "task_group": {
+          "title": "Task Group",
+          "type": "string"
+        },
+        "type": {
+          "const": "range",
+          "title": "Type",
+          "type": "string"
+        },
+        "var": {
+          "title": "Var",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "var",
+        "type",
+        "target",
+        "task_group"
+      ],
+      "title": "ThresholdRange",
+      "type": "object"
+    },
+    "ThresholdUpperLimit": {
+      "description": "Upper limit threshold for the objective.\n\nAttributes:\n    id: The ID for the range.\n    var: The variable associated with the objective.\n    type: The type of threshold.\n    target: The target value.\n    task_group: The task group for this objective.",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "target": {
+          "exclusiveMinimum": 0,
+          "maximum": 20,
+          "title": "Target",
+          "type": "integer"
+        },
+        "task_group": {
+          "title": "Task Group",
+          "type": "string"
+        },
+        "type": {
+          "const": "upper_limit",
+          "title": "Type",
+          "type": "string"
+        },
+        "var": {
+          "title": "Var",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "var",
+        "type",
+        "target",
+        "task_group"
+      ],
+      "title": "ThresholdUpperLimit",
+      "type": "object"
+    },
+    "Value": {
+      "description": "Value for inputs and outputs.\n\nAttributes:\n    id: The ID for the value.\n    var: The associated variable.",
+      "properties": {
+        "id": {
+          "title": "Id",
+          "type": "string"
+        },
+        "var": {
+          "title": "Var",
+          "type": "string"
+        }
+      },
+      "required": [
+        "id",
+        "var"
+      ],
+      "title": "Value",
+      "type": "object"
+    }
+  },
+  "description": "Main INTERSECT campaign model.\n\nAttributes:\n    id: The ID of the campaign.\n    run_id: The execution job id for the orchestrator to use.\n    name: The name of the campaign.\n    user: The user of the campaign.\n    description: The description of the campaign.\n    task_groups: A group of tasks.\n    objectives: Objectives for the campaign.\n    inputs: Inputs for the campaign.\n    outputs: Outputs for the campaign.",
+  "properties": {
+    "description": {
+      "title": "Description",
+      "type": "string"
+    },
+    "id": {
+      "title": "Id",
+      "type": "string"
+    },
+    "inputs": {
+      "items": {
+        "$ref": "#/$defs/Input"
+      },
+      "title": "Inputs",
+      "type": "array"
+    },
+    "name": {
+      "title": "Name",
+      "type": "string"
+    },
+    "objectives": {
+      "anyOf": [
+        {
+          "$ref": "#/$defs/Objective"
+        },
+        {
+          "type": "null"
+        }
+      ],
+      "default": null
+    },
+    "outputs": {
+      "items": {
+        "$ref": "#/$defs/Output"
+      },
+      "title": "Outputs",
+      "type": "array"
+    },
+    "run_id": {
+      "title": "Run Id",
+      "type": "string"
+    },
+    "task_groups": {
+      "items": {
+        "$ref": "#/$defs/TaskGroup"
+      },
+      "title": "Task Groups",
+      "type": "array"
+    },
+    "user": {
+      "title": "User",
+      "type": "string"
+    }
+  },
+  "required": [
+    "id",
+    "name",
+    "user",
+    "description"
+  ],
+  "title": "Campaign",
+  "type": "object"
+}

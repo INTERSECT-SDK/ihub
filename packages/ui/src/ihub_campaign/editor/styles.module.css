@@ -1,0 +1,647 @@
+.campaignBuilder {
+  width: 100%;
+  height: calc(100% - 35px);
+  display: flex;
+  flex-direction: column;
+}
+
+.campaignFlowArea {
+  width: 100%;
+  min-height: 0;
+  min-width: 0;
+  flex: 1;
+  position: relative;
+  isolation: isolate;
+}
+
+.campaignWorkspace {
+  display: flex;
+  flex: 1;
+  min-height: 0;
+  min-width: 0;
+}
+
+.campaignSidePanel {
+  background: var(--mantine-color-body);
+  border-left: 1px solid var(--mantine-color-default-border);
+  flex: 0 0 auto;
+  min-height: 0;
+  overflow: hidden;
+  position: relative;
+}
+
+.campaignSidePanelSeparator {
+  bottom: 0;
+  cursor: col-resize;
+  left: 0;
+  position: absolute;
+  top: 0;
+  width: 10px;
+  z-index: 3;
+}
+
+.campaignSidePanelSeparator::after {
+  background: transparent;
+  bottom: 0;
+  content: '';
+  left: 4px;
+  position: absolute;
+  top: 0;
+  width: 2px;
+}
+
+.campaignSidePanelSeparator:hover::after,
+.campaignSidePanelSeparator:focus-visible::after {
+  background: var(--mantine-color-blue-6);
+}
+
+.campaignAllNodes {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 0;
+}
+
+.campaignAllNodesHeader {
+  padding: var(--mantine-spacing-md);
+  border-bottom: 1px solid var(--mantine-color-default-border);
+}
+
+.campaignAllNodesContent {
+  min-height: 0;
+  overflow-y: auto;
+  padding: var(--mantine-spacing-md);
+}
+
+.campaignAllNodesRow {
+  width: 100%;
+  min-width: 0;
+  padding: 10px 8px;
+  border: 1px solid var(--mantine-color-default-border);
+  border-radius: var(--mantine-radius-sm);
+  color: var(--mantine-color-text);
+  background: var(--mantine-color-body);
+  display: flex;
+  align-items: center;
+  gap: var(--mantine-spacing-xs);
+  text-align: left;
+  cursor: pointer;
+}
+
+.campaignAllNodesRow:hover {
+  background: var(--mantine-color-default-hover);
+}
+
+.campaignAllNodesRow:focus-visible {
+  outline: 2px solid var(--mantine-color-blue-6);
+  outline-offset: 2px;
+}
+
+.campaignAllNodesRowText {
+  min-width: 0;
+  flex: 1;
+}
+
+.campaignFlowArea > :global(.react-flow) {
+  position: relative;
+  z-index: 0;
+}
+
+.campaignAlertLayer {
+  position: absolute;
+  z-index: 1;
+  inset: 0 0 auto;
+  pointer-events: none;
+}
+
+.executionError {
+  position: relative;
+  border-radius: 0;
+  padding: 6px 10px;
+  background-color: light-dark(
+    var(--mantine-color-red-0),
+    var(--mantine-color-red-9)
+  );
+  pointer-events: auto;
+}
+
+.historicalRunNotice {
+  position: relative;
+  width: 100%;
+  border-radius: 0;
+  padding: 5px 10px;
+  box-shadow: var(--mantine-shadow-sm);
+  pointer-events: auto;
+}
+
+.historicalRunNoticeInfo {
+  background-color: light-dark(
+    var(--mantine-color-blue-0),
+    var(--mantine-color-blue-9)
+  );
+}
+
+.historicalRunNoticeWarning {
+  background-color: light-dark(
+    var(--mantine-color-yellow-0),
+    var(--mantine-color-yellow-9)
+  );
+}
+
+.executionError :global(.mantine-Alert-title),
+.executionError :global(.mantine-Alert-message),
+.historicalRunNotice :global(.mantine-Alert-message) {
+  margin: 0;
+  line-height: 1.25;
+}
+
+.historicalRunNoticeText {
+  min-width: 220px;
+  flex: 1;
+}
+
+.campaignOnboarding {
+  position: absolute;
+  z-index: 5;
+  top: 50%;
+  left: 50%;
+  width: min(460px, calc(100% - 32px));
+  padding: 20px;
+  transform: translate(-50%, -50%);
+  background-color: light-dark(
+    color-mix(in srgb, var(--mantine-color-white) 96%, transparent),
+    color-mix(in srgb, var(--mantine-color-dark-7) 96%, transparent)
+  );
+}
+
+.campaignOnboardingStep {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  margin-top: 16px;
+  padding-top: 16px;
+  border-top: 1px solid
+    light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-4));
+  opacity: 0.55;
+}
+
+.campaignOnboardingStep:first-of-type,
+.campaignOnboardingStep[data-active='true'],
+.campaignOnboardingStep[data-complete='true'] {
+  opacity: 1;
+}
+
+.campaignOnboardingStepContent {
+  min-width: 0;
+  flex: 1;
+}
+
+.taskGroupObjectivesPanel {
+  margin: 0;
+  padding: 3px 8px;
+  border-radius: 0;
+  border-top: 1px solid
+    light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-5));
+  background-color: light-dark(
+    var(--mantine-color-gray-0),
+    var(--mantine-color-dark-7)
+  );
+}
+
+.taskGroupObjectivesPanel[data-expanded='true'] {
+  padding-bottom: 8px;
+}
+
+.taskGroupObjectivesToggle {
+  min-width: 0;
+  padding: 3px 2px;
+  border: 0;
+  color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-gray-2));
+  background: transparent;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  cursor: pointer;
+}
+
+.taskGroupObjectivesToggle:hover {
+  color: light-dark(var(--mantine-color-gray-9), var(--mantine-color-white));
+}
+
+.taskGroupObjectivesToggle:focus-visible {
+  outline: 2px solid var(--task-group-accent, var(--mantine-color-blue-6));
+  outline-offset: 1px;
+  border-radius: 3px;
+}
+
+.taskGroupObjectivesChevron {
+  flex: 0 0 auto;
+  color: var(--task-group-accent, var(--mantine-color-blue-6));
+  transition: transform 120ms ease;
+}
+
+.taskGroupObjectivesToggle[aria-expanded='true'] .taskGroupObjectivesChevron {
+  transform: rotate(90deg);
+}
+
+.taskGroupObjectivesList {
+  margin-top: 6px;
+  display: grid;
+  gap: 6px;
+}
+
+.taskGroupObjectiveItem {
+  border: 1px solid
+    light-dark(var(--mantine-color-gray-3), var(--mantine-color-dark-4));
+  border-radius: 4px;
+  padding: 6px 8px;
+  background-color: light-dark(
+    var(--mantine-color-white),
+    var(--mantine-color-dark-6)
+  );
+}
+
+.objectiveFieldSmall {
+  min-width: 120px;
+}
+
+.objectiveFieldMedium {
+  min-width: 180px;
+}
+
+.campaignBuilderMenuBar {
+  width: 100%;
+  height: 35px;
+  background-color: light-dark(
+    var(--mantine-color-blue-1),
+    var(--mantine-color-gray-7)
+  );
+  vertical-align: middle;
+}
+
+.campaignContainer {
+  height: 100%;
+  width: 100%;
+}
+
+.campaignSheetsBar {
+  width: 100%;
+  min-height: 42px;
+  padding: 0px 2px;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  border-top: 1px solid
+    light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-4));
+  background-color: light-dark(
+    var(--mantine-color-gray-0),
+    var(--mantine-color-dark-7)
+  );
+  overflow-x: auto;
+}
+
+.campaignTaskGroupsSection {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  min-width: max-content;
+}
+
+.campaignSheetDivider {
+  width: 1px;
+  height: 24px;
+  background-color: light-dark(
+    var(--mantine-color-gray-4),
+    var(--mantine-color-dark-3)
+  );
+  margin: 0 4px;
+}
+
+.campaignSheetTab {
+  border: 1px solid
+    light-dark(var(--mantine-color-gray-4), var(--mantine-color-dark-3));
+  background-color: light-dark(
+    var(--mantine-color-gray-1),
+    var(--mantine-color-dark-6)
+  );
+  color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-gray-1));
+  border-radius: 0 0 0 0;
+  padding: 6px 12px;
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 300;
+  cursor: pointer;
+  white-space: nowrap;
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease;
+}
+
+.campaignSheetTab:hover {
+  background-color: light-dark(
+    var(--mantine-color-gray-2),
+    var(--mantine-color-dark-5)
+  );
+
+  color: light-dark(var(--mantine-color-dark-9), var(--mantine-color-light-1));
+}
+
+.campaignSheetTab[data-selected='true'] {
+  border-color: light-dark(
+    var(--mantine-color-blue-4),
+    var(--mantine-color-blue-7)
+  );
+  background-color: light-dark(
+    var(--mantine-color-blue-0),
+    var(--mantine-color-dark-5)
+  );
+  color: light-dark(var(--mantine-color-blue-8), var(--mantine-color-blue-1));
+}
+
+.campaignSheetTabContent {
+  padding: 2px 2px;
+  align-items: center;
+}
+
+.taskGroupTabIteration {
+  color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-gray-4));
+  font-size: var(--mantine-font-size-xs);
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.campaignToolbarSplitButton {
+  border-radius: 6px 0 0 6px;
+  min-height: 32px;
+  border-right: 1px solid
+    light-dark(rgba(18, 110, 255, 0.25), rgba(114, 151, 255, 0.35));
+}
+
+.campaignToolbarSplitToggle {
+  min-width: 32px;
+  width: 32px;
+  min-height: 32px;
+  height: 32px;
+  border-radius: 0 6px 6px 0;
+  border-left: 1px solid
+    light-dark(rgba(18, 110, 255, 0.25), rgba(114, 151, 255, 0.35));
+}
+
+.campaignToolbarSplitToggle:hover {
+  background-color: light-dark(
+    var(--mantine-color-blue-7),
+    var(--mantine-color-blue-6)
+  );
+}
+
+.taskGroupTabStatusIndicator {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  display: inline-flex;
+  flex: 0 0 auto;
+  margin-left: 2px;
+  background-color: light-dark(
+    var(--mantine-color-gray-5),
+    var(--mantine-color-gray-4)
+  );
+}
+
+.taskGroupTabStatusIndicator[data-status='waiting'] {
+  background-color: light-dark(
+    var(--mantine-color-gray-6),
+    var(--mantine-color-gray-4)
+  );
+}
+
+.taskGroupTabStatusIndicator[data-status='executing'] {
+  width: 10px;
+  height: 10px;
+  border: 2px solid var(--mantine-color-yellow-5);
+  border-right-color: transparent;
+  border-radius: 999px;
+  background-color: transparent;
+  animation: task-group-status-spin 800ms linear infinite;
+}
+
+.taskGroupTabStatusIndicator[data-status='complete'] {
+  background-color: var(--mantine-color-green-6);
+}
+
+.taskGroupTabStatusIndicator[data-status='error'],
+.taskGroupTabStatusIndicator[data-status='aborted'] {
+  background-color: var(--mantine-color-red-6);
+}
+
+@keyframes task-group-status-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
+.addTaskGroupButton {
+  border: 1px dashed
+    light-dark(var(--mantine-color-blue-4), var(--mantine-color-blue-7));
+  background-color: light-dark(
+    var(--mantine-color-blue-0),
+    var(--mantine-color-dark-6)
+  );
+  color: light-dark(var(--mantine-color-blue-8), var(--mantine-color-blue-1));
+  border-radius: 0;
+  padding: 6px 12px;
+  font-size: 12px;
+  line-height: 1;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+.addTaskGroupButton:hover {
+  background-color: light-dark(
+    var(--mantine-color-blue-1),
+    var(--mantine-color-dark-5)
+  );
+}
+
+.connectionWarning {
+  position: fixed;
+  z-index: 1000;
+  max-width: 320px;
+  padding: 6px 10px;
+  color: var(--mantine-color-white);
+  font-size: var(--mantine-font-size-sm);
+  line-height: 1.4;
+  background-color: var(--mantine-color-dark-6);
+  border-radius: var(--mantine-radius-sm);
+  box-shadow: var(--mantine-shadow-sm);
+  pointer-events: none;
+  transform: translate(-50%, calc(-100% - 10px));
+}
+
+.boundedMenuDropdown {
+  max-width: calc(100vw - 24px);
+  max-height: min(360px, calc(100dvh - 80px));
+  overflow-x: hidden;
+  overflow-y: auto;
+}
+
+.addNodeMenuDropdown {
+  width: min(400px, calc(100vw - 24px));
+  white-space: nowrap;
+  padding: 0;
+}
+
+.addNodeSubmenuDropdown {
+  width: min(360px, calc(100vw - 24px));
+  padding: 0;
+}
+
+.addNodeMenuScrollArea {
+  max-width: calc(100vw - 24px);
+  max-height: min(360px, calc(100dvh - 80px));
+  overflow-x: hidden;
+  overflow-y: auto;
+  padding: 4px;
+}
+
+.priorRunsMenuDropdown {
+  width: min(300px, calc(100vw - 24px));
+}
+
+.boundedMenuDropdown :global(.mantine-Menu-itemLabel),
+.boundedMenuDropdown :global(.mantine-Menu-label),
+.addNodeMenuScrollArea :global(.mantine-Menu-itemLabel),
+.addNodeMenuScrollArea :global(.mantine-Menu-label) {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.addNodeMenuItem {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  cursor: pointer;
+  padding: 8px 12px;
+  border-radius: 4px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  color: inherit;
+  font-size: 14px;
+  transition: background-color 150ms ease;
+
+  &:hover {
+    background-color: light-dark(
+      var(--mantine-color-gray-1),
+      var(--mantine-color-gray-7)
+    );
+  }
+}
+
+.slidingMenuLabel {
+  min-width: 0;
+  flex: 1;
+  display: block;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.slidingMenuLabelContent {
+  display: block;
+  width: max-content;
+  white-space: nowrap;
+}
+
+.addNodeMenuItem:hover
+  .slidingMenuLabel[data-overflowing='true']
+  .slidingMenuLabelContent,
+.addNodeMenuScrollArea
+  :global(.mantine-Menu-item):hover
+  .slidingMenuLabel[data-overflowing='true']
+  .slidingMenuLabelContent,
+.boundedMenuDropdown
+  :global(.mantine-Menu-item):hover
+  .slidingMenuLabel[data-overflowing='true']
+  .slidingMenuLabelContent {
+  animation: slideMenuLabel var(--menu-label-slide-duration) ease-in-out 350ms
+    infinite alternate;
+}
+
+@keyframes slideMenuLabel {
+  to {
+    transform: translateX(calc(-1 * var(--menu-label-overflow)));
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .slidingMenuLabelContent {
+    animation: none !important;
+  }
+}
+
+/* Theme-aware ReactFlow Controls */
+:global(.react-flow__controls) {
+  background-color: white;
+  border: 1px solid var(--mantine-color-gray-2);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.08);
+}
+
+:global([data-mantine-color-scheme='dark'] .react-flow__controls) {
+  background-color: var(--mantine-color-gray-8);
+  border: 1px solid var(--mantine-color-gray-7);
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.3);
+}
+
+:global(.react-flow__controls button) {
+  color: var(--mantine-color-gray-7);
+  background-color: white;
+  border-color: var(--mantine-color-gray-2);
+}
+
+:global([data-mantine-color-scheme='dark'] .react-flow__controls button) {
+  color: var(--mantine-color-gray-2);
+  background-color: var(--mantine-color-gray-8);
+  border-color: var(--mantine-color-gray-7);
+}
+
+:global(.react-flow__controls button svg) {
+  stroke: var(--mantine-color-gray-7);
+}
+
+:global([data-mantine-color-scheme='dark'] .react-flow__controls button svg) {
+  stroke: var(--mantine-color-gray-2);
+}
+
+:global(.react-flow__controls button:hover) {
+  background-color: var(--mantine-color-gray-0);
+}
+
+:global([data-mantine-color-scheme='dark'] .react-flow__controls button:hover) {
+  background-color: var(--mantine-color-gray-7);
+}
+
+:global(.react-flow__controls button:active) {
+  background-color: var(--mantine-color-gray-1);
+}
+
+:global(
+  [data-mantine-color-scheme='dark'] .react-flow__controls button:active
+) {
+  background-color: var(--mantine-color-gray-6);
+}
+
+/* Hide ReactFlow Pro icon/logo */
+:global(.react-flow-pro-icon) {
+  display: none !important;
+}
+
+:global(.react-flow__attribution) {
+  display: none !important;
+}

@@ -1,0 +1,93 @@
+.card {
+  background-color: transparent;
+  margin-bottom: 50px;
+  border: none;
+  border-top: 1px solid
+    light-dark(var(--mantine-color-gray-2), rgba(255, 255, 255, 0.24));
+  border-radius: 0%;
+  margin: 50px;
+}
+
+.title {
+  font-family:
+    Greycliff CF,
+    var(--mantine-font-family);
+  font-weight: 700;
+  cursor: default;
+}
+
+.groupCount {
+  cursor: default;
+}
+
+.brokerGroups {
+  display: flex;
+  flex-direction: column;
+  gap: var(--mantine-spacing-md);
+}
+
+.brokerGroup {
+  padding: var(--mantine-spacing-sm);
+  border: 1px solid
+    light-dark(var(--mantine-color-gray-2), var(--mantine-color-dark-4));
+  border-radius: var(--mantine-radius-md);
+}
+
+.brokerLabel {
+  margin: 0 0 var(--mantine-spacing-xs);
+  font-weight: 600;
+  color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-gray-3));
+}
+
+.item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+  border-radius: var(--mantine-radius-md);
+  height: 90px;
+  background-color: transparent;
+  border: 1px solid transparent;
+  transition:
+    background-color 150ms ease,
+    border-color 150ms ease,
+    box-shadow 150ms ease,
+    transform 100ms ease;
+
+  @mixin hover {
+    background-color: light-dark(
+      var(--mantine-color-gray-0),
+      var(--mantine-color-gray-8)
+    );
+    border-color: light-dark(
+      var(--mantine-color-gray-3),
+      var(--mantine-color-gray-7)
+    );
+    box-shadow: none;
+    transform: scale(1.02);
+  }
+}
+
+.item:disabled,
+.item[data-disabled] {
+  cursor: not-allowed;
+  opacity: 0.45;
+}
+
+.item:disabled:hover,
+.item[data-disabled]:hover {
+  box-shadow: none;
+  transform: none;
+}
+
+.statusBadge {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1;
+  pointer-events: none;
+}

@@ -1,0 +1,13 @@
+packages:
+  - "apps/frontend/*"
+  - "apps/backend/*"
+  - "packages/*"
+peerDependencyRules:
+  allowedVersions:
+    "tailwind-preset-mantine>@mantine/core": "8"
+allowBuilds:
+  docsify: true
+  es5-ext: true
+  esbuild: true
+  sharp: true
+  unrs-resolver: true

@@ -1,0 +1,18 @@
+{
+  "success": [
+    {"type": "message.start", "conversationId": "contract-conversation", "messageId": "<generated-message-id>", "senderId": "remote:7:weather-agent", "timestamp": "<generated-timestamp>"},
+    {"type": "tool.start", "conversationId": "contract-conversation", "messageId": "<generated-message-id>", "toolCallId": "tool-weather-1", "toolName": "get_weather", "input": {"city": "Oak Ridge"}, "timestamp": "<generated-timestamp>"},
+    {"type": "tool.progress", "conversationId": "contract-conversation", "messageId": "<generated-message-id>", "toolCallId": "tool-weather-1", "label": "get_weather", "detail": "Running tool", "status": "running"},
+    {"type": "message.delta", "conversationId": "contract-conversation", "messageId": "<generated-message-id>", "delta": "Checking"},
+    {"type": "message.delta", "conversationId": "contract-conversation", "messageId": "<generated-message-id>", "delta": " now"},
+    {"type": "tool.progress", "conversationId": "contract-conversation", "messageId": "<generated-message-id>", "toolCallId": "tool-weather-1", "label": "get_weather", "detail": "Tool finished", "status": "complete"},
+    {"type": "tool.result", "conversationId": "contract-conversation", "messageId": "<generated-message-id>", "toolCallId": "tool-weather-1", "toolName": "get_weather", "result": {"temperature": 72, "unit": "F"}},
+    {"type": "message.complete", "conversationId": "contract-conversation", "messageId": "<generated-message-id>", "content": "Checking now"}
+  ],
+  "error": [
+    {"type": "message.start", "conversationId": "contract-conversation", "messageId": "<generated-message-id>", "senderId": "remote:7:weather-agent", "timestamp": "<generated-timestamp>"},
+    {"type": "message.delta", "conversationId": "contract-conversation", "messageId": "<generated-message-id>", "delta": "Partial"},
+    {"type": "message.complete", "conversationId": "contract-conversation", "messageId": "<generated-message-id>", "content": "Partial"},
+    {"type": "error", "conversationId": "contract-conversation", "messageId": "<generated-message-id>", "error": "Remote agent server invocation failed: LangGraph stream failed"}
+  ]
+}

@@ -1,0 +1,72 @@
+<!doctype html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <title>iHub Documentation</title>
+        <meta http-equiv="X-UA-Compatible" content="IE=edge,chrome=1" />
+        <meta
+            name="description"
+            content="User and configuration documentation for iHub."
+        />
+        <meta
+            name="viewport"
+            content="width=device-width, initial-scale=1.0, minimum-scale=1.0"
+        />
+        <link rel="icon" href="/intersect_icon_dark.svg" type="image/svg+xml" />
+        <link
+            rel="stylesheet"
+            href="//cdn.jsdelivr.net/npm/docsify@4/lib/themes/vue.css"
+        />
+        <style>
+            .back-to-top {
+                margin-top: 2rem;
+                text-align: right;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="app"></div>
+        <script>
+            function backToTopPlugin(hook) {
+                hook.afterEach(function (html) {
+                    return (
+                        html +
+                        '<div class="back-to-top">' +
+                        '<a class="back-to-top-link" href="#">back to top</a>' +
+                        "</div>"
+                    );
+                });
+
+                hook.doneEach(function () {
+                    const link = document.querySelector(".back-to-top-link");
+
+                    link.addEventListener("click", function (event) {
+                        event.preventDefault();
+
+                        const main = document.getElementById("main");
+
+                        document.scrollingElement.scrollTop = 0;
+                        main.setAttribute("tabindex", "-1");
+                        main.focus({ preventScroll: true });
+                    });
+                });
+            }
+
+            window.$docsify = {
+                name: "iHub",
+                repo: "",
+
+                alias: {
+                    "/.*/_sidebar.md": "/_sidebar.md",
+                },
+                auto2top: true,
+                loadSidebar: true,
+                maxLevel: 4,
+                plugins: [backToTopPlugin],
+                subMaxLevel: 3,
+            };
+        </script>
+        <!-- Docsify v4 -->
+        <script src="//cdn.jsdelivr.net/npm/docsify@4"></script>
+    </body>
+</html>

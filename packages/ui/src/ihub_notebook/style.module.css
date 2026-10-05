@@ -1,0 +1,70 @@
+.cell {
+  border: 1px solid var(--mantine-color-gray-1);
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+
+.cell:hover {
+  border: 1px solid var(--mantine-color-blue-2);
+  transition: border 0.2s ease-in-out;
+}
+
+.cellActive {
+  border: 1px solid var(--mantine-color-blue-4);
+  border-radius: 4px;
+  margin-bottom: 12px;
+}
+
+.cellControls {
+  opacity: 0.1;
+  transition: opacity 0.2s ease-in-out;
+  height: '32px';
+}
+
+.cellControls:hover {
+  opacity: 1;
+  transition: opacity 0.2s ease-in-out;
+}
+
+.cellControlsActive {
+  opacity: 1;
+  height: '32px';
+}
+
+.cellSource {
+  display: inline-flex;
+  width: 100%;
+  margin: 5px 0px 10px 0px;
+  padding-bottom: 20px;
+}
+
+.codeEditor {
+  width: 100%;
+  outline: none;
+  margin-right: 10px;
+  margin-left: 10px;
+}
+
+.cellOutput {
+  padding: 20px 0px 40px 30px;
+  margin-left: 20px;
+  margin-right: 10px;
+}
+
+.editorContainer {
+  position: relative;
+  height: 100%;
+  width: 100%;
+}
+
+.monacoEditor {
+  background-color: transparent !important; /* Make editor background transparent */
+}
+
+.monacoEditor .margin {
+  background-color: transparent !important; /* Transparent margin */
+}
+
+.monacoEditor .content {
+  background-color: transparent !important; /* Transparent content area */
+}

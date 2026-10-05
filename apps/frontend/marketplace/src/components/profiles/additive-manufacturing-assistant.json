@@ -1,0 +1,20 @@
+{
+  "name": "Additive Manufacturing Assistant",
+  "fileName": "additive-manufacturing-assistant",
+  "shortDescription": "AI Agent for  Additive Manufacturing",
+  "longDescription": "Lorem ipsum odor amet, consectetuer adipiscing elit. Dignissim id mus tempus aliquam felis non hendrerit. Vehicula diam turpis sagittis ullamcorper vivamus dui vulputate litora. Magnis parturient enim vestibulum at nullam himenaeos imperdiet enim. Pharetra sapien amet eu ullamcorper purus pulvinar per nibh mus. Malesuada purus luctus etiam leo placerat varius penatibus. Nisi aenean nulla aliquam ante hendrerit quisque facilisis felis. Consectetur nostra at a varius erat.",
+  "project": "Adamantine Simulation Assistant",
+  "division": "Computation Sciences and Engineering Division",
+  "directorate": "CSSD",
+  "repository": "https://code.ornl.gov/asa",
+  "brokerIPAddress": "http://192.0.2.1",
+  "brokerPort": 5672,
+  "brokerProtocol": "ampq0.9.1",
+  "contact": "Lenard Roberts",
+  "contribrutors": ["Marge Hill", "Jeremy Norris"],
+  "website": "https://ornl.gov/situ",
+  "published": "January 1, 2025",
+  "lastUpdated": "January 1, 2025",
+  "icon": "IconRobot",
+  "headerImageURL": "https://img.electronicdesign.com/files/base/ebm/electronicdesign/image/2022/02/Industrial_Sheng_Zhang_dreamstime_l_100447234.6203d69189a76.png?auto=format,compress&fit=crop&q=45&h=528&height=528&w=950&width=950"
+}

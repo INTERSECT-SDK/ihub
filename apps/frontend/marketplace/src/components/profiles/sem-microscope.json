@@ -1,0 +1,20 @@
+{
+  "name": "Microscope",
+  "fileName": "sem-microscope",
+  "shortDescription": "Scan and characterize quantum materials",
+  "longDescription": "Lorem ipsum odor amet, consectetuer adipiscing elit. Dignissim id mus tempus aliquam felis non hendrerit. Vehicula diam turpis sagittis ullamcorper vivamus dui vulputate litora. Magnis parturient enim vestibulum at nullam himenaeos imperdiet enim. Pharetra sapien amet eu ullamcorper purus pulvinar per nibh mus. Malesuada purus luctus etiam leo placerat varius penatibus. Nisi aenean nulla aliquam ante hendrerit quisque facilisis felis. Consectetur nostra at a varius erat.",
+  "project": "QCAD",
+  "division": "Computation Science and Engineering",
+  "directorate": "CCSD",
+  "repository": "https://code.ornl.gov/qcad",
+  "brokerIPAddress": "http://192.0.2.1",
+  "brokerPort": 5672,
+  "brokerProtocol": "ampq0.9.1",
+  "contact": "Joshua Williams",
+  "contribrutors": ["Michael Wilkinson", "Bernice Tafoya"],
+  "website": "https://ornl.gov/qcad",
+  "published": "January 1, 2025",
+  "lastUpdated": "January 1, 2025",
+  "icon": "microscope",
+  "headerImageURL": "https://scx1.b-cdn.net/csz/news/800a/2024/breakthrough-in-quantu.jpg"
+}

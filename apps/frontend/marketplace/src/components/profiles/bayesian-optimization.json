@@ -1,0 +1,20 @@
+{
+  "name": "Bayesian Optimization",
+  "fileName": "bayesian-optimization",
+  "shortDescription": "Model parameter tuning service",
+  "longDescription": "Lorem ipsum odor amet, consectetuer adipiscing elit. Dignissim id mus tempus aliquam felis non hendrerit. Vehicula diam turpis sagittis ullamcorper vivamus dui vulputate litora. Magnis parturient enim vestibulum at nullam himenaeos imperdiet enim. Pharetra sapien amet eu ullamcorper purus pulvinar per nibh mus. Malesuada purus luctus etiam leo placerat varius penatibus. Nisi aenean nulla aliquam ante hendrerit quisque facilisis felis. Consectetur nostra at a varius erat.",
+  "project": "DIALED",
+  "division": "Computation Science and Engineering",
+  "directorate": "CCSD",
+  "repository": "https://code.ornl.gov/dialed",
+  "brokerIPAddress": "http://192.0.2.1",
+  "brokerPort": 5672,
+  "brokerProtocol": "ampq0.9.1",
+  "contact": "Griselda Sears",
+  "contribrutors": ["Terri Berlingame", "Jeremy Norris"],
+  "website": "https://ornl.gov/dialed",
+  "published": "January 1, 2025",
+  "lastUpdated": "January 1, 2025",
+  "icon": "chart-histogram",
+  "headerImageURL": "https://miro.medium.com/v2/resize:fit:1400/format:webp/1*PhKGj_bZlND8IEfII426wA.png"
+}

@@ -1,0 +1,107 @@
+.root {
+  --control-padding: 4px;
+  --segment-count: 2;
+  --active-index: 0;
+
+  position: relative;
+  display: grid;
+  grid-template-columns: repeat(var(--segment-count), minmax(0, 1fr));
+  align-items: stretch;
+  width: 100%;
+  min-height: 30px;
+  padding: var(--control-padding);
+  border: 1px solid
+    light-dark(var(--mantine-color-gray-3), var(--mantine-color-gray-7));
+  border-radius: var(--mantine-radius-xl);
+  background: light-dark(
+    var(--mantine-color-gray-1),
+    var(--mantine-color-gray-8)
+  );
+  box-sizing: border-box;
+  overflow: hidden;
+}
+
+.indicator {
+  position: absolute;
+  top: var(--control-padding);
+  bottom: var(--control-padding);
+  left: var(--control-padding);
+  width: calc((100% - var(--control-padding) * 2) / var(--segment-count));
+  border: 1px solid
+    light-dark(var(--mantine-color-gray-2), var(--mantine-color-gray-6));
+  border-radius: var(--mantine-radius-xl);
+  background: light-dark(
+    var(--mantine-color-white),
+    var(--mantine-color-gray-7)
+  );
+  box-shadow: light-dark(
+    0 1px 3px rgba(0, 0, 0, 0.12),
+    0 1px 3px rgba(0, 0, 0, 0.35)
+  );
+  box-sizing: border-box;
+  transform: translateX(calc(var(--active-index) * 100%));
+  transition: transform 120ms ease;
+  pointer-events: none;
+}
+
+.option {
+  position: relative;
+  z-index: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  height: 20px;
+  border-radius: var(--mantine-radius-xl);
+  box-sizing: border-box;
+  cursor: pointer;
+}
+
+.option:has(.input:disabled) {
+  cursor: not-allowed;
+}
+
+.input {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: 0;
+  padding: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.label {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  overflow: hidden;
+  color: light-dark(var(--mantine-color-gray-7), var(--mantine-color-gray-2));
+  font-size: var(--mantine-font-size-xs);
+  font-weight: 500;
+  line-height: 20px;
+  text-align: center;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  box-sizing: border-box;
+  user-select: none;
+  transition: color 120ms ease;
+}
+
+.input:checked + .label {
+  color: light-dark(var(--mantine-color-blue-7), var(--mantine-color-blue-2));
+}
+
+.option:has(.input:focus-visible) {
+  outline: 2px solid var(--mantine-color-blue-5);
+  outline-offset: -1px;
+}
+
+.input:focus-visible + .label {
+  outline: 2px solid var(--mantine-color-blue-5);
+  outline-offset: -1px;
+}
+
+.option:has(.input:disabled) .label {
+  color: light-dark(var(--mantine-color-gray-5), var(--mantine-color-gray-4));
+}

@@ -1,0 +1,48 @@
+{
+  "name": "ihub",
+  "version": "0.118.1",
+  "private": true,
+  "contributors": [
+    {
+      "name": "Phillipe Austria"
+    },
+    {
+      "name": "Shayan Monadjemi"
+    },
+    {
+      "name": "Kristin Maroun"
+    },
+    {
+      "name": "Lance Drance"
+    },
+    {
+      "name": "Marshal McDonnell"
+    },
+    {
+      "name": "Ayana Ghosh"
+    },
+    {
+      "name": "Chad Steed"
+    }
+  ],
+  "scripts": {
+    "build": "turbo build",
+    "dev": "turbo dev",
+    "start": "turbo start",
+    "lint": "turbo lint",
+    "format": "turbo format",
+    "docs": "docsify serve apps/frontend/docs --port 3003",
+    "deploy:build": "docker compose -f docker-compose.prod.yml build",
+    "deploy:up": "docker compose -f docker-compose.prod.yml up -d",
+    "deploy:stop": "docker compose -f docker-compose.prod.yml stop",
+    "deploy:down": "docker compose -f docker-compose.prod.yml down"
+  },
+  "devDependencies": {
+    "turbo": "^2.10.12",
+    "typescript": "^7.0.2"
+  },
+  "packageManager": "pnpm@12.4.1",
+  "engines": {
+    "node": ">=18"
+  }
+}

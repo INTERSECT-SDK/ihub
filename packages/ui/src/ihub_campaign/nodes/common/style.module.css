@@ -1,0 +1,193 @@
+.nodeWrapper {
+  position: relative;
+  width: 100%;
+  height: auto;
+  display: flex;
+  flex-direction: column;
+  overflow: visible;
+}
+
+.canvasHeader {
+  min-width: 0;
+}
+
+.canvasHeadingGroup {
+  flex: 1;
+  min-width: 0;
+}
+
+.canvasHeaderActions {
+  flex-shrink: 0;
+}
+
+.collapsedSubtitle {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.nodeTags {
+  flex-shrink: 0;
+  margin-top: auto;
+}
+
+.inspectorNode {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+  min-height: 100%;
+}
+
+.inspectorHeader {
+  align-items: flex-start;
+  border-bottom: 1px solid var(--mantine-color-default-border);
+  display: flex;
+  gap: var(--mantine-spacing-sm);
+  justify-content: space-between;
+  padding: var(--mantine-spacing-md);
+}
+
+.inspectorHeadingGroup {
+  min-width: 0;
+}
+
+.inspectorHeading {
+  margin: 0;
+  outline: none;
+}
+
+.inspectorTags {
+  border-bottom: 1px solid var(--mantine-color-default-border);
+  padding: var(--mantine-spacing-xs) var(--mantine-spacing-md);
+}
+
+.inspectorContent {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: var(--mantine-spacing-md);
+}
+
+.inspectorContent :global(img),
+.inspectorContent :global(canvas),
+.inspectorContent :global(svg) {
+  max-width: 100%;
+}
+
+.nodeOutputHandle {
+  width: 10px;
+  height: 10px;
+  background-color: var(--mantine-color-gray-9);
+}
+
+.nodeInputHandle {
+  width: 10px;
+  height: 10px;
+  border: 2px solid;
+  border-color: var(--mantine-color-gray-9);
+  background-color: var(--mantine-color-gray-5);
+}
+
+.primaryHandle {
+  width: 20px !important;
+  height: 20px !important;
+  background: var(--handle-color, var(--mantine-color-blue-6)) !important;
+  border: 2px solid var(--mantine-color-body);
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+  position: absolute;
+}
+
+.primaryHandle:hover {
+  width: 24px !important;
+  height: 24px !important;
+  filter: brightness(1.1);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+  transform: scale(1.1);
+}
+
+/* Left handle positioning */
+.primaryHandle[data-handlepos='left'] {
+  left: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.primaryHandle[data-handlepos='left']:hover {
+  transform: translateY(-50%) scale(1.1);
+}
+
+/* Right handle positioning */
+.primaryHandle[data-handlepos='right'] {
+  right: -6px;
+  top: 50%;
+  transform: translateY(-50%);
+}
+
+.primaryHandle[data-handlepos='right']:hover {
+  transform: translateY(-50%) scale(1.1);
+}
+
+/* Top handle positioning */
+.primaryHandle[data-handlepos='top'] {
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.primaryHandle[data-handlepos='top']:hover {
+  transform: translateX(-50%) scale(1.1);
+}
+
+/* Bottom handle positioning */
+.primaryHandle[data-handlepos='bottom'] {
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.primaryHandle[data-handlepos='bottom']:hover {
+  transform: translateX(-50%) scale(1.1);
+}
+
+.secondaryHandle {
+  width: 12px;
+  height: 12px;
+  background: var(--handle-color, #3b82f6) !important;
+  border: 2px solid white;
+  border-radius: 50%;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+  transition: all 0.2s ease;
+  position: absolute;
+}
+
+.secondaryHandle:hover {
+  width: 14px;
+  height: 14px;
+  filter: brightness(1.1);
+  box-shadow: 0 3px 6px rgba(0, 0, 0, 0.3);
+  transform: scale(1.1);
+}
+
+/* Top secondary handle positioning */
+.secondaryHandle[data-handlepos='top'] {
+  top: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.secondaryHandle[data-handlepos='top']:hover {
+  transform: translateX(-50%) scale(1.1);
+}
+
+/* Bottom secondary handle positioning */
+.secondaryHandle[data-handlepos='bottom'] {
+  bottom: -6px;
+  left: 50%;
+  transform: translateX(-50%);
+}
+
+.secondaryHandle[data-handlepos='bottom']:hover {
+  transform: translateX(-50%) scale(1.1);
+}

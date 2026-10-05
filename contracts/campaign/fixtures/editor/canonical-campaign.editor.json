@@ -1,0 +1,497 @@
+{
+  "id": "canonical-editor-contract-001",
+  "run_id": "123e4567-e89b-42d3-a456-426614174011",
+  "name": "Canonical Editor Contract",
+  "user": "contract-user",
+  "description": "Raw CampaignModel editor persistence characterization",
+  "task_groups": [
+    {
+      "id": "canonical-acquisition-group",
+      "group_dependencies": [],
+      "tasks": [
+        {
+          "id": "canonical-event-once",
+          "hierarchy": "org.facility.events",
+          "capability": "Contract Events",
+          "operation_id": null,
+          "event_name": "ready",
+          "event_mode": "once",
+          "event_count": null,
+          "output": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "ready": { "type": "boolean" }
+              }
+            },
+            "values": [{ "id": "canonical-ready-value", "var": "ready" }]
+          },
+          "input": null,
+          "task_dependencies": [],
+          "task_objectives": null,
+          "capability_metadata": {
+            "id": "canonical-events-capability",
+            "name": "Contract Events",
+            "created_at": "2026-08-02T12:00:00Z",
+            "last_lifecycle_message": "2026-08-02T12:01:00Z",
+            "service_id": 81,
+            "endpoints_schema": {
+              "endpoints": {},
+              "events": {
+                "ready": {
+                  "type": "object",
+                  "properties": {
+                    "ready": { "type": "boolean" }
+                  }
+                }
+              },
+              "description": "Direct Event schema"
+            }
+          },
+          "ui_position": { "x": 80, "y": 120 }
+        },
+        {
+          "id": "canonical-event-count",
+          "hierarchy": "org.facility.events",
+          "capability": "Contract Events",
+          "operation_id": null,
+          "event_name": "sample",
+          "event_mode": "count",
+          "event_count": 5,
+          "output": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "sample": { "type": "number" }
+              }
+            },
+            "values": [{ "id": "canonical-sample-value", "var": "sample" }]
+          },
+          "input": null,
+          "task_dependencies": ["canonical-event-once"],
+          "task_objectives": null,
+          "capability_metadata": {
+            "id": "canonical-events-capability",
+            "name": "Contract Events",
+            "created_at": "2026-08-02T12:00:00Z",
+            "last_lifecycle_message": "2026-08-02T12:01:00Z",
+            "service_id": 81,
+            "endpoints_schema": {
+              "endpoints": {},
+              "events": {
+                "sample": { "$ref": "#/components/schemas/SampleEvent" }
+              },
+              "components": {
+                "schemas": {
+                  "SampleEvent": {
+                    "type": "object",
+                    "properties": {
+                      "sample": { "type": "number" }
+                    }
+                  }
+                }
+              },
+              "description": "Referenced count Event schema"
+            }
+          },
+          "ui_position": { "x": 400, "y": 120 }
+        },
+        {
+          "id": "canonical-event-persistent",
+          "hierarchy": "org.facility.events",
+          "capability": "Contract Events",
+          "operation_id": null,
+          "event_name": "heartbeat",
+          "event_mode": "persistent",
+          "event_count": null,
+          "output": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "sequence": { "type": "integer" }
+              }
+            },
+            "values": [{ "id": "canonical-sequence-value", "var": "sequence" }]
+          },
+          "input": null,
+          "task_dependencies": ["canonical-event-count"],
+          "task_objectives": null,
+          "capability_metadata": {
+            "id": "canonical-events-capability",
+            "name": "Contract Events",
+            "created_at": "2026-08-02T12:00:00Z",
+            "last_lifecycle_message": "2026-08-02T12:01:00Z",
+            "service_id": 81,
+            "endpoints_schema": {
+              "endpoints": {},
+              "events": {
+                "heartbeat": {
+                  "$ref": "#/components/schemas/HeartbeatEvent"
+                }
+              },
+              "components": {
+                "schemas": {
+                  "HeartbeatEvent": {
+                    "type": "object",
+                    "properties": {
+                      "sequence": { "type": "integer" }
+                    }
+                  }
+                }
+              },
+              "description": "Referenced persistent Event schema"
+            }
+          },
+          "ui_position": { "x": 720, "y": 120 }
+        },
+        {
+          "id": "canonical-capability",
+          "hierarchy": "org.facility.processor",
+          "capability": "Contract Processor",
+          "operation_id": "process",
+          "event_name": null,
+          "event_mode": "once",
+          "event_count": null,
+          "output": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "result": { "type": "number" },
+                "image": { "type": "string" },
+                "message": { "type": "string" }
+              }
+            },
+            "values": [
+              { "id": "canonical-result-value", "var": "result" },
+              { "id": "canonical-image-value", "var": "image" },
+              { "id": "canonical-message-value", "var": "message" }
+            ]
+          },
+          "input": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "sample": { "type": "number" },
+                "label": { "type": "string" }
+              }
+            },
+            "values": [
+              { "id": "canonical-sample-value", "var": "sample" },
+              { "id": "canonical-label-value", "var": "label" }
+            ]
+          },
+          "task_dependencies": [
+            "canonical-event-once",
+            "canonical-event-count",
+            "canonical-event-persistent"
+          ],
+          "task_objectives": {
+            "max_runtime": [
+              {
+                "id": "canonical-task-runtime",
+                "max_time": "PT5M",
+                "task_group": "canonical-acquisition-group"
+              }
+            ],
+            "threshold": [
+              {
+                "id": "canonical-task-threshold",
+                "var": "result",
+                "type": "upper_limit",
+                "target": 10,
+                "task_group": "canonical-acquisition-group"
+              }
+            ]
+          },
+          "capability_metadata": {
+            "id": "canonical-processor-capability",
+            "name": "Contract Processor",
+            "created_at": "2026-08-02T12:00:00Z",
+            "last_lifecycle_message": "2026-08-02T12:01:00Z",
+            "service_id": 82,
+            "endpoints_schema": {
+              "endpoints": {},
+              "description": "Canonical capability metadata",
+              "unknown_nested_property": "preserve-canonical-nested-extension"
+            }
+          },
+          "endpoint_channel": {
+            "publish": {
+              "message": {
+                "schemaFormat": "application/schema+json;version=draft-07",
+                "contentType": "application/json",
+                "traits": { "$ref": "" },
+                "payload": { "type": "object", "title": "Processor output" }
+              },
+              "description": "Processor output"
+            },
+            "subscribe": {
+              "message": {
+                "schemaFormat": "application/schema+json;version=draft-07",
+                "contentType": "application/json",
+                "traits": { "$ref": "" },
+                "payload": { "type": "object", "title": "Processor input" }
+              },
+              "description": "Processor input"
+            },
+            "events": []
+          },
+          "manual_input_values": { "label": "manual-contract-value" },
+          "ui_position": { "x": 1040, "y": 120 },
+          "unknown_task_property": "preserve-canonical-task-extension"
+        }
+      ],
+      "objectives": [
+        {
+          "id": "canonical-assert-objective",
+          "type": "assert",
+          "var": "ready",
+          "target": true
+        }
+      ],
+      "ui_edges": [
+        {
+          "id": "canonical-edge-once-count",
+          "source": "canonical-event-once",
+          "target": "canonical-event-count",
+          "sourceHandle": "bottom",
+          "targetHandle": "top",
+          "data": { "isDependencyEdge": true }
+        },
+        {
+          "id": "canonical-edge-count-capability",
+          "source": "canonical-event-count",
+          "target": "canonical-capability",
+          "sourceHandle": "output-right",
+          "targetHandle": "input-left",
+          "data": {
+            "data_mapping": [
+              { "source_parameter": "sample", "target_parameter": "sample" }
+            ],
+            "horizontalDirection": "right",
+            "unknown_edge_data_property": "preserve-canonical-edge-data-extension"
+          },
+          "unknown_edge_property": "preserve-canonical-edge-extension"
+        }
+      ],
+      "ui_position": { "x": 120, "y": 100 }
+    },
+    {
+      "id": "canonical-presentation-group",
+      "group_dependencies": ["canonical-acquisition-group"],
+      "tasks": [
+        {
+          "id": "canonical-visualization",
+          "hierarchy": "visualization",
+          "capability": "Visualization",
+          "operation_id": "plotly-line",
+          "event_name": null,
+          "event_mode": "once",
+          "event_count": null,
+          "output": null,
+          "input": null,
+          "task_dependencies": ["canonical-json-file"],
+          "task_objectives": null,
+          "manual_input_values": {
+            "__visualization_name": "Canonical line chart",
+            "__visualization_config": {
+              "input_mappings": {
+                "x": {
+                  "sourceNodeId": "canonical-json-file",
+                  "sourcePath": "/timestamps"
+                },
+                "y": {
+                  "sourceNodeId": "canonical-json-text",
+                  "sourcePath": "/readings"
+                }
+              }
+            }
+          },
+          "ui_position": { "x": 720, "y": 120 }
+        },
+        {
+          "id": "canonical-image-renderer",
+          "hierarchy": "renderer",
+          "capability": "Renderer",
+          "operation_id": "image-renderer",
+          "event_name": null,
+          "event_mode": "once",
+          "event_count": null,
+          "output": null,
+          "input": null,
+          "task_dependencies": ["canonical-visualization"],
+          "task_objectives": null,
+          "manual_input_values": {
+            "__visualization_name": "Canonical image",
+            "__visualization_config": {
+              "input_mappings": {
+                "image": {
+                  "sourceNodeId": "canonical-capability",
+                  "sourcePath": "image"
+                }
+              }
+            }
+          },
+          "ui_position": { "x": 1040, "y": 120 }
+        },
+        {
+          "id": "canonical-text-renderer",
+          "hierarchy": "renderer",
+          "capability": "Renderer",
+          "operation_id": "text-renderer",
+          "event_name": null,
+          "event_mode": "once",
+          "event_count": null,
+          "output": null,
+          "input": null,
+          "task_dependencies": ["canonical-visualization"],
+          "task_objectives": null,
+          "manual_input_values": {
+            "__visualization_name": "Canonical text",
+            "__visualization_config": {
+              "input_mappings": {
+                "text": {
+                  "sourceNodeId": "canonical-capability",
+                  "sourcePath": "message"
+                }
+              }
+            }
+          },
+          "ui_position": { "x": 1040, "y": 360 }
+        },
+        {
+          "id": "canonical-json-file",
+          "hierarchy": "json-file",
+          "capability": "JSON File",
+          "operation_id": "source",
+          "event_name": null,
+          "event_mode": "once",
+          "event_count": null,
+          "output": null,
+          "input": null,
+          "task_dependencies": [],
+          "task_objectives": null,
+          "json_file_data": {
+            "name": "canonical-input.json",
+            "fileReference": {
+              "projectId": "project-contract-2",
+              "path": "inputs/canonical-input.json",
+              "jupyterServerId": "jupyter-contract-2"
+            },
+            "manifest": [
+              {
+                "pointer": "/timestamps",
+                "displayName": "timestamps",
+                "type": "number[]",
+                "unknown_nested_property": "preserve-canonical-manifest-extension"
+              }
+            ],
+            "contentHash": "sha256:canonical-editor-contract"
+          },
+          "ui_position": { "x": 80, "y": 120 }
+        },
+        {
+          "id": "canonical-json-text",
+          "hierarchy": "json-text",
+          "capability": "JSON Text",
+          "operation_id": "source",
+          "event_name": null,
+          "event_mode": "once",
+          "event_count": null,
+          "output": null,
+          "input": null,
+          "task_dependencies": [],
+          "task_objectives": null,
+          "json_text_data": {
+            "name": "Canonical inline input",
+            "textContent": "{\"readings\":[1.5,2.5,3.5]}",
+            "manifest": [
+              {
+                "pointer": "/readings",
+                "displayName": "readings",
+                "type": "number[]"
+              }
+            ]
+          },
+          "ui_position": { "x": 400, "y": 120 }
+        }
+      ],
+      "objectives": [
+        {
+          "id": "canonical-iterate-objective",
+          "type": "iterate",
+          "iterations": 4
+        }
+      ],
+      "ui_edges": [
+        {
+          "id": "canonical-edge-json-visualization",
+          "source": "canonical-json-file",
+          "target": "canonical-visualization",
+          "sourceHandle": "output-right",
+          "targetHandle": "input-left",
+          "data": {
+            "data_mapping": [
+              { "source_parameter": "/timestamps", "target_parameter": "x" }
+            ],
+            "horizontalDirection": "right"
+          }
+        },
+        {
+          "id": "canonical-edge-visualization-image",
+          "source": "canonical-visualization",
+          "target": "canonical-image-renderer",
+          "sourceHandle": "bottom",
+          "targetHandle": "top",
+          "data": { "isDependencyEdge": true }
+        }
+      ],
+      "ui_position": { "x": 520, "y": 100 }
+    }
+  ],
+  "objectives": {
+    "max_runtime": [
+      {
+        "id": "canonical-campaign-runtime",
+        "max_time": "PT30M",
+        "task_group": "canonical-presentation-group"
+      }
+    ],
+    "threshold": [
+      {
+        "id": "canonical-campaign-threshold",
+        "var": "result",
+        "type": "range",
+        "target": 2.5,
+        "task_group": "canonical-acquisition-group"
+      }
+    ]
+  },
+  "inputs": [
+    {
+      "schema": {
+        "type": "object",
+        "properties": { "campaign_seed": { "type": "integer" } }
+      },
+      "values": [
+        { "id": "canonical-campaign-seed-value", "var": "campaign_seed" }
+      ]
+    }
+  ],
+  "outputs": [
+    {
+      "schema": {
+        "type": "object",
+        "properties": { "campaign_result": { "type": "number" } }
+      },
+      "values": [
+        { "id": "canonical-campaign-result-value", "var": "campaign_result" }
+      ]
+    }
+  ],
+  "selected_broker_id": "broker-canonical-9",
+  "contract_notes": {
+    "code_task_support": "deferred to Steps 4 and 6"
+  },
+  "unknown_document_property": "preserve-canonical-document-extension"
+}

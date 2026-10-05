@@ -1,0 +1,20 @@
+{
+  "name": "Visualization",
+  "fileName": "visualization",
+  "shortDescription": "Anomaly dectection service",
+  "longDescription": "Lorem ipsum odor amet, consectetuer adipiscing elit. Dignissim id mus tempus aliquam felis non hendrerit. Vehicula diam turpis sagittis ullamcorper vivamus dui vulputate litora. Magnis parturient enim vestibulum at nullam himenaeos imperdiet enim. Pharetra sapien amet eu ullamcorper purus pulvinar per nibh mus. Malesuada purus luctus etiam leo placerat varius penatibus. Nisi aenean nulla aliquam ante hendrerit quisque facilisis felis. Consectetur nostra at a varius erat.",
+  "project": "SITU",
+  "division": "Cyber Resilience and Intelligence",
+  "directorate": "NSSD",
+  "repository": "https://code.ornl.gov/situ",
+  "brokerIPAddress": "http://192.0.2.1",
+  "brokerPort": 5672,
+  "brokerProtocol": "ampq0.9.1",
+  "contact": "Lenard Roberts",
+  "contribrutors": ["Marge Hill", "Jeremy Norris"],
+  "website": "https://ornl.gov/situ",
+  "published": "January 1, 2025",
+  "lastUpdated": "January 1, 2025",
+  "icon": "chart-dots-2",
+  "headerImageURL": "https://miro.medium.com/v2/resize:fit:1400/format:webp/1*oxvTvzn0fztqoNlnZkK71g.png"
+}

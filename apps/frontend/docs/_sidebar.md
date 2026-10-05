@@ -1,0 +1,22 @@
+<!-- markdownlint-disable first-line-h1 -->
+
+- [Introduction](README.md)
+- [Quick Start](quick-start.md)
+- [Projects and Files](projects-and-files.md)
+- Applications
+  - [Campaign Builder](applications/campaign-builder.md)
+  - [Notebook](applications/notebook.md)
+  - [Chat](applications/chat.md)
+- Develop with INTERSECT
+  - [Create a Capability](development/create-intersect-capability.md)
+- Configure iHub
+  - [Configuration Overview](configuration/overview.md)
+  - [INTERSECT Servers](configuration/intersect-servers.md)
+  - [AI Agents](configuration/agents.md)
+  - [LLM Servers](configuration/llm-servers.md)
+  - [MCP Servers](configuration/mcp-servers.md)
+  - [Jupyter Servers](configuration/jupyter-servers.md)
+- Help and Reference
+  - [Troubleshooting](help/troubleshooting.md)
+  - [File Formats](help/file-formats.md)
+  - [Glossary](help/glossary.md)

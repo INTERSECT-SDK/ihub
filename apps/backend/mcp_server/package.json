@@ -1,0 +1,19 @@
+{
+  "name": "mcp-server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "install": "pdm install --check --frozen-lockfile --dev",
+    "dev": "pdm run dev",
+    "start": "pdm run start",
+    "format": "pdm run format",
+    "lint": "pdm run lint",
+    "test": "pdm run test",
+    "lint:check": "pdm run lint-check",
+    "format:check": "pdm run format-check"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}

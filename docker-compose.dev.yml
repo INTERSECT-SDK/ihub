@@ -1,0 +1,153 @@
+services:
+  projects-volume-init:
+    container_name: ihub-projects-volume-init
+    image: busybox:1.36
+    command: sh -c "mkdir -p /projects && chown -R 1000:100 /projects && find /projects -type d -exec chmod 2775 {} + && find /projects -type f -exec chmod 0664 {} +"
+    restart: 'no'
+    volumes:
+      - ihub_projects:/projects
+
+  database:
+    container_name: ihub-database
+    image: bitnamilegacy/postgresql:17
+    # full list of environment variables available at https://github.com/bitnami/containers/tree/231cb510c9f39dc7100d2a0c117beaef007f5fac/bitnami/postgresql#environment-variables
+    environment:
+      POSTGRESQL_USERNAME: ihub_username
+      POSTGRESQL_PASSWORD: ihub_password
+      POSTGRESQL_DATABASE: ihub
+    healthcheck:
+      test: pg_isready -U "ihub_username" -d "ihub_password"
+      interval: 10s
+      retries: 5
+      start_period: 10s
+      timeout: 10s
+    ports:
+      - "5432:5432"
+    volumes:
+      - ihub_postgresql_data:/bitnami/postgresql
+    networks:
+      - internal
+
+  nginx-dev:
+    build:
+      context: ./apps/backend/nginx_dev
+    restart: always
+    environment:
+      PROJECT_FILE_UPLOAD_MAX_BYTES: ${PROJECT_FILE_UPLOAD_MAX_BYTES:-10485760}
+      NGINX_HUB_UPSTREAM: host.docker.internal:3000
+      NGINX_MARKETPLACE_UPSTREAM: host.docker.internal:3001
+      NGINX_SERVER_UPSTREAM: host.docker.internal:8000
+      NGINX_DOCS_UPSTREAM: host.docker.internal:3002
+      NGINX_MCP_UPSTREAM: host.docker.internal:8100
+      NGINX_OLLAMA_UPSTREAM: host.docker.internal:11434
+    ports:
+      - "8080:8080"
+    networks:
+      - internal
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+      - "host.containers.internal:host-gateway"
+
+  redis:
+    container_name: ihub-redis
+    image: redis:8.6-trixie
+    restart: always
+    ports:
+      - "6379:6379"
+    networks:
+      - internal
+    volumes:
+      - ihub_redis_data:/data
+
+  ihub-jupyterhub:
+    build:
+      context: ./apps/backend/jupyter_hub
+      dockerfile: Dockerfile
+      args:
+        JUPYTERHUB_VERSION: 5.4.2
+    restart: always
+    container_name: ihub-jupyterhub
+    networks:
+      - internal
+    volumes:
+      # The JupyterHub configuration file
+      - "./apps/backend/jupyter_hub/jupyterhub_config.py:/srv/jupyterhub/jupyterhub_config.py:ro"
+      # The Jupyter Server config file
+      - "./apps/backend/jupyter_hub/jupyter_server_config.py:/srv/user-config/jupyter_server_config.py:ro"
+      # Bind Docker socket on the host so we can connect to the daemon from
+      # within the container
+      - "/var/run/docker.sock:/var/run/docker.sock:rw"
+      # Bind Docker volume on host for JupyterHub database and cookie secrets
+      - "ihub_jupyter_data:/data"
+      - "ihub_jupyter_single_user_config:/single_user_config"
+    depends_on:
+      projects-volume-init:
+        condition: service_completed_successfully
+    ports:
+      - "5482:8000"
+    environment:
+      # This username will be a JupyterHub admin
+      JUPYTERHUB_ADMIN: admin
+      # All containers will join this network
+      DOCKER_NETWORK_NAME: ihub_internal_network
+      # JupyterHub will spawn this Notebook image for users
+      # DOCKER_NOTEBOOK_IMAGE: quay.io/jupyter/scipy-notebook:hub-5.4.2
+      DOCKER_NOTEBOOK_IMAGE: quay.io/jupyterhub/singleuser:5.4.2
+      # Notebook directory inside user image
+      DOCKER_NOTEBOOK_DIR: /home/jovyan/work
+      OAUTH_CLIENT_ID: ${CLIENT_ID}
+      OAUTH_CLIENT_SECRET: ${CLIENT_SECRET}
+      SCOPE: ${SCOPE}
+      OAUTH_AUTHORIZE_URL: ${keycloak_authorize_url}
+      OAUTH_TOKEN_URL: ${keycloak_token_url}
+      OAUTH_USERDATA_URL: ${OAUTH_USERDATA_URL}
+      JUPYTER_OAUTH_CALLBACK_URL: ${JUPYTER_OAUTH_CALLBACK_URL}
+      JUPYTER_PUBLIC_URL: ${JUPYTER_PUBLIC_URL}
+      JUPYTER_VALIDATE_CERT: ${JUPYTER_VALIDATE_CERT}
+      JUPYTERHUB_SECURE_COOKIES: ${JUPYTERHUB_SECURE_COOKIES}
+      JUPYTER_SECURE_COOKIES: ${JUPYTER_SECURE_COOKIES}
+      AUTH_MODE: ${AUTH_MODE:-oauth}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      DEV_AUTH_EMAIL: ${DEV_AUTH_EMAIL:-dev.user@example.com}
+      DEV_AUTH_NAME: ${DEV_AUTH_NAME:-Local Dev User}
+      JH_ADMIN_TOKEN: ${JUYTER_HUB_ADMIN_TOKEN}
+
+  ihub-keycloak:
+    container_name: ihub-keycloak
+    image: quay.io/keycloak/keycloak:26.5
+    command: start-dev
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_STARTING_ADMIN_USERNAME}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_STARTING_ADMIN_PASSWORD}
+      KC_HTTP_RELATIVE_PATH: /auth
+      KC_PROXY_HEADERS: xforwarded
+      KC_SPI_HTML_CONTENT_SECURITY_POLICY: frame-src 'self' localhost:8080
+      KC_HOSTNAME: localhost
+      KC_HOSTNAME_STRICT: "false"
+    networks:
+      - internal
+    ports:
+      - "8086:8080"
+    volumes:
+      - ihub_keycloak_data:/opt/keycloak/data
+
+# Define a network, which allows containers to communicate
+# with each other, by using their container name as a hostname
+networks:
+  internal:
+    name: ihub_internal_network
+    driver: bridge
+
+volumes:
+  ihub_postgresql_data:
+    driver: local
+  ihub_redis_data:
+    driver: local
+  ihub_jupyter_data:
+    driver: local
+  ihub_jupyter_single_user_config:
+    driver: local
+  ihub_keycloak_data:
+    driver: local
+  ihub_projects:
+    driver: local

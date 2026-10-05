@@ -1,0 +1,17 @@
+{
+  "name": "server",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "install": "pdm install",
+    "dev": "pdm run dev",
+    "start": "pdm run start",
+    "format": "pdm run format",
+    "lint": "pdm run lint",
+    "test": "pdm run test",
+    "test:coverage": "pdm run test-coverage && pdm run coverage-services"
+  },
+  "dependencies": {
+    "pyjwt": "0.0.1-security"
+  }
+}

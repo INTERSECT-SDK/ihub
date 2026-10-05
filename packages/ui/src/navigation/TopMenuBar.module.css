@@ -1,0 +1,19 @@
+.outerContainer {
+  position: sticky;
+  top: 0;
+  z-index: 10;
+  background-color: light-dark(white, var(--mantine-color-gray-8));
+}
+
+.innerContainer {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+  column-gap: var(--mantine-spacing-sm);
+  height: 35px;
+  padding: 0 var(--mantine-spacing-xs);
+  background-color: light-dark(
+    var(--mantine-color-blue-0),
+    var(--mantine-color-gray-7)
+  );
+}

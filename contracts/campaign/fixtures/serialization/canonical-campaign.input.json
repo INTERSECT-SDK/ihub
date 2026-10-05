@@ -1,0 +1,256 @@
+{
+  "id": "contract-campaign-001",
+  "name": "Campaign Contract",
+  "user": "contract-user",
+  "description": "Canonical Campaign serialization contract",
+  "task_groups": [
+    {
+      "id": "acquisition-group",
+      "group_dependencies": [],
+      "tasks": [
+        {
+          "id": "generate-reading",
+          "hierarchy": "org.facility.generator",
+          "capability": "Generator",
+          "operation_id": "generate",
+          "event_name": null,
+          "event_mode": "once",
+          "event_count": null,
+          "output": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "reading": {
+                  "type": "number",
+                  "description": "Generated reading"
+                }
+              }
+            },
+            "values": [
+              {
+                "id": "shared-reading-value",
+                "var": "reading"
+              }
+            ]
+          },
+          "input": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "seed": {
+                  "type": "integer",
+                  "default": 7
+                }
+              }
+            },
+            "values": [
+              {
+                "id": "seed-value",
+                "var": "seed"
+              }
+            ]
+          },
+          "task_dependencies": [],
+          "task_objectives": null
+        },
+        {
+          "id": "temperature-event",
+          "hierarchy": "org.facility.sensor",
+          "capability": "Sensor",
+          "operation_id": null,
+          "event_name": "temperature",
+          "event_mode": "count",
+          "event_count": 2,
+          "output": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "temperature": {
+                  "type": "number"
+                }
+              }
+            },
+            "values": [
+              {
+                "id": "shared-temperature-value",
+                "var": "temperature"
+              }
+            ]
+          },
+          "input": null,
+          "task_dependencies": [],
+          "task_objectives": null
+        },
+        {
+          "id": "consume-reading",
+          "hierarchy": "org.facility.consumer",
+          "capability": "Consumer",
+          "operation_id": "consume",
+          "event_name": null,
+          "event_mode": "once",
+          "event_count": null,
+          "output": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "accepted": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "values": [
+              {
+                "id": "accepted-value",
+                "var": "accepted"
+              }
+            ]
+          },
+          "input": {
+            "schema": {
+              "type": "object",
+              "properties": {
+                "reading": {
+                  "type": "number"
+                },
+                "temperature": {
+                  "type": "number"
+                },
+                "label": {
+                  "type": "string",
+                  "default": "manual"
+                }
+              }
+            },
+            "values": [
+              {
+                "id": "shared-reading-value",
+                "var": "reading"
+              },
+              {
+                "id": "shared-temperature-value",
+                "var": "temperature"
+              },
+              {
+                "id": "label-value",
+                "var": "label"
+              }
+            ]
+          },
+          "task_dependencies": [
+            "generate-reading",
+            "temperature-event"
+          ],
+          "task_objectives": {
+            "max_runtime": [],
+            "threshold": [
+              {
+                "id": "task-threshold",
+                "var": "accepted",
+                "type": "upper_limit",
+                "target": 1,
+                "task_group": "acquisition-group"
+              }
+            ]
+          }
+        }
+      ],
+      "objectives": [
+        {
+          "id": "assert-accepted",
+          "type": "assert",
+          "var": "accepted",
+          "target": true
+        }
+      ]
+    },
+    {
+      "id": "presentation-group",
+      "group_dependencies": [
+        "acquisition-group"
+      ],
+      "tasks": [
+        {
+          "id": "histogram-node",
+          "hierarchy": "visualization",
+          "capability": "Visualization",
+          "operation_id": "vega-histogram_contract_histogram",
+          "event_name": null,
+          "event_mode": "once",
+          "event_count": null,
+          "output": null,
+          "input": null,
+          "task_dependencies": [],
+          "task_objectives": null
+        },
+        {
+          "id": "json-text-artifact",
+          "hierarchy": "json-text",
+          "capability": "JSON Text",
+          "operation_id": "render_json_text",
+          "event_name": null,
+          "event_mode": "once",
+          "event_count": null,
+          "output": null,
+          "input": null,
+          "task_dependencies": [],
+          "task_objectives": null
+        }
+      ],
+      "objectives": [
+        {
+          "id": "iterate-presentation",
+          "type": "iterate",
+          "iterations": 2
+        }
+      ]
+    }
+  ],
+  "objectives": {
+    "max_runtime": [],
+    "threshold": [
+      {
+        "id": "campaign-threshold",
+        "var": "accepted",
+        "type": "range",
+        "target": 2.5,
+        "task_group": "acquisition-group"
+      }
+    ]
+  },
+  "inputs": [
+    {
+      "schema": {
+        "type": "object",
+        "properties": {
+          "campaign_seed": {
+            "type": "integer"
+          }
+        }
+      },
+      "values": [
+        {
+          "id": "campaign-seed-value",
+          "var": "campaign_seed"
+        }
+      ]
+    }
+  ],
+  "outputs": [
+    {
+      "schema": {
+        "type": "object",
+        "properties": {
+          "campaign_result": {
+            "type": "boolean"
+          }
+        }
+      },
+      "values": [
+        {
+          "id": "campaign-result-value",
+          "var": "campaign_result"
+        }
+      ]
+    }
+  ]
+}

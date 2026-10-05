@@ -1,0 +1,83 @@
+.chatInputForm {
+  padding-top: var(--padding-top, var(--mantine-spacing-xs));
+  padding-bottom: var(--padding-bottom, var(--mantine-spacing-md));
+  background: var(--form-bg);
+}
+
+.chatInputFormDefault {
+  background: transparent;
+}
+.chatInputFormCentered {
+  background: transparent;
+}
+
+.chatInputContainer {
+  position: relative;
+  width: 100%;
+}
+
+.chatInputContainerCentered {
+  max-width: 980px;
+  margin: 0 auto;
+}
+
+.chatInputPaper {
+  position: relative;
+  overflow: visible;
+  border-radius: var(--mantine-radius-xl);
+  background-color: light-dark(
+    var(--mantine-color-white),
+    var(--mantine-color-gray-9)
+  );
+  border-color: light-dark(rgba(16, 24, 40, 0.18), rgba(255, 255, 255, 0.14));
+  box-shadow: light-dark(
+    0 1px 3px rgba(16, 24, 40, 0.08),
+    0 1px 3px rgba(0, 0, 0, 0.24)
+  );
+  transition:
+    border-color 140ms ease,
+    box-shadow 140ms ease;
+}
+
+.chatInputPaper:focus-within {
+  border-color: var(--mantine-color-blue-5);
+  box-shadow: 0 0 0 2px rgba(34, 139, 230, 0.12);
+}
+
+.chatInputPaperCentered {
+  border-radius: var(--mantine-radius-xl);
+}
+
+.chatInputPaperDefault {
+  background-color: light-dark(
+    var(--mantine-color-white),
+    var(--mantine-color-gray-9)
+  );
+}
+
+.chatInputMentionHighlight {
+  background-color: light-dark(
+    var(--mantine-color-blue-1),
+    var(--mantine-color-blue-9)
+  );
+  color: light-dark(var(--mantine-color-blue-8), var(--mantine-color-blue-2));
+  border-radius: 6px;
+}
+
+.chatInputSendButton {
+  position: absolute;
+  right: 8px;
+  bottom: 8px;
+  z-index: 3;
+}
+
+.chatInputAttachButton {
+  position: absolute;
+  left: 8px;
+  bottom: 8px;
+  z-index: 3;
+}
+
+.chatInputFileInput {
+  display: none;
+}

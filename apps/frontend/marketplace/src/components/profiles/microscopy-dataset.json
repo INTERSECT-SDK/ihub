@@ -1,0 +1,20 @@
+{
+  "name": "Materials Datasets",
+  "fileName": "microscopy-dataset",
+  "shortDescription": "Materials Project Public Datatsets.",
+  "longDescription": "The Materials Project datasets are a comprehensive collection of computed materials properties, generated using high-throughput density functional theory (DFT) calculations. Developed by the Materials Project initiative at Lawrence Berkeley National Laboratory, these datasets provide open access to information on thousands of inorganic compounds, including their crystal structures, electronic properties, thermodynamic stability, and more. The goal is to accelerate materials discovery and innovation by offering researchers and engineers reliable, machine-readable data that can be used for computational modeling, experimental planning, and materials design.",
+  "project": "M.P. Datasets Capability",
+  "division": "Computational Sciences and Engineering",
+  "directorate": "CCSD",
+  "repository": "https://code.ornl.gov/mp-datasets",
+  "brokerIPAddress": "http://127.0.0.1",
+  "brokerPort": 5672,
+  "brokerProtocol": "ampq0.9.1",
+  "contact": "Lenard Roberts",
+  "contribrutors": ["Marge Hill", "Jeremy Norris"],
+  "website": "https://ornl.gov/mp-datasets",
+  "published": "January 1, 2025",
+  "lastUpdated": "January 1, 2025",
+  "icon": "IconTableRow",
+  "headerImageURL": "https://www.ornl.gov/sites/default/files/2021-11/21-G02214_Helix_0.png"
+}

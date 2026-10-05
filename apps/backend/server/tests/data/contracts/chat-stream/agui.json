@@ -1,0 +1,18 @@
+{
+  "success": [
+    {"type": "message.start", "conversationId": "contract-conversation", "messageId": "<generated-message-id>", "senderId": "remote:7:weather-agent", "timestamp": "<generated-timestamp>"},
+    {"type": "tool.start", "conversationId": "contract-conversation", "messageId": "<generated-message-id>", "toolCallId": "tool-weather-1", "toolName": "get_weather", "input": null, "timestamp": "<generated-timestamp>"},
+    {"type": "tool.progress", "conversationId": "contract-conversation", "messageId": "<generated-message-id>", "toolCallId": "tool-weather-1", "label": "get_weather", "detail": "Running tool", "status": "running"},
+    {"type": "tool.progress", "conversationId": "contract-conversation", "messageId": "<generated-message-id>", "toolCallId": "tool-weather-1", "label": "get_weather", "detail": "Arguments: {\"city\": \"Oak Ridge\"}", "status": "running"},
+    {"type": "tool.progress", "conversationId": "contract-conversation", "messageId": "<generated-message-id>", "toolCallId": "tool-weather-1", "label": "get_weather", "detail": "Tool finished", "status": "complete"},
+    {"type": "tool.result", "conversationId": "contract-conversation", "messageId": "<generated-message-id>", "toolCallId": "tool-weather-1", "toolName": "get_weather", "result": {"temperature": 72, "unit": "F"}},
+    {"type": "message.delta", "conversationId": "contract-conversation", "messageId": "<generated-message-id>", "delta": "It is "},
+    {"type": "message.delta", "conversationId": "contract-conversation", "messageId": "<generated-message-id>", "delta": "72 F."},
+    {"type": "message.complete", "conversationId": "contract-conversation", "messageId": "<generated-message-id>", "content": "It is 72 F."}
+  ],
+  "error": [
+    {"type": "message.start", "conversationId": "contract-conversation", "messageId": "<generated-message-id>", "senderId": "remote:7:weather-agent", "timestamp": "<generated-timestamp>"},
+    {"type": "message.delta", "conversationId": "contract-conversation", "messageId": "<generated-message-id>", "delta": "Partial"},
+    {"type": "error", "conversationId": "contract-conversation", "messageId": "<generated-message-id>", "error": "AG-UI stream failed"}
+  ]
+}

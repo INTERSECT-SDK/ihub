@@ -1,0 +1,127 @@
+[project]
+name = "mcp-server"
+version = "0.1.0"
+description = "Default template for PDM package"
+dependencies = [
+  "mcp[cli]",
+  "pydantic>=2.11.7",
+  "fastmcp>=2.14.5",
+  "fastapi[standard]>=0.115.14",
+  "sse-starlette>=2.3.6",
+]
+requires-python = ">=3.12"
+readme = "README.md"
+
+[[project.authors]]
+name = "Austria, Phillipe"
+email = "austriaps@ornl.gov"
+
+[project.license]
+text = "MIT"
+
+[dependency-groups]
+dev = ["ruff>=0.8.3", "mypy>=1.13.0", "pytest>=9.0.2"]
+
+[tool.pdm]
+distribution = false
+
+[tool.pdm.scripts]
+format = "ruff format"
+lint = "ruff check --fix"
+test = "pytest"
+lint-check = "ruff check"
+format-check = "ruff format --check"
+
+[tool.pdm.scripts.dev]
+env_file = ".env"
+cmd = "python main.py"
+
+[tool.pdm.scripts.start]
+env_file = ".env"
+cmd = "python main.py"
+
+[tool.ruff]
+line-length = 100
+
+[tool.ruff.format]
+quote-style = "single"
+
+[tool.ruff.lint]
+extend-select = [
+  "C90",
+  "I",
+  "N",
+  "UP",
+  "YTT",
+  "ASYNC",
+  "S",
+  "BLE",
+  "B",
+  "A",
+  "COM",
+  "C4",
+  "DTZ",
+  "T10",
+  "EM",
+  "FA",
+  "ISC",
+  "ICN",
+  "G",
+  "INP",
+  "PIE",
+  "T20",
+  "PYI",
+  "PT",
+  "Q",
+  "RSE",
+  "RET",
+  "SLF",
+  "SLOT",
+  "SIM",
+  "TCH",
+  "ARG",
+  "PTH",
+  "PGH",
+  "PL",
+  "TRY",
+  "FLY",
+  "RUF",
+]
+ignore = ["COM812", "ISC001", "SIM105", "ANN101", "ANN102", "ANN401", "PLR2004"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["db"]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.lint.flake8-quotes]
+inline-quotes = "single"
+multiline-quotes = "double"
+
+[tool.ruff.lint.mccabe]
+max-complexity = 20
+
+[tool.ruff.lint.pylint]
+max-args = 10
+max-branches = 20
+max-returns = 10
+max-statements = 75
+
+[tool.ruff.lint.extend-per-file-ignores]
+"__init__.py" = ["F401"]
+"docs/*" = ["D", "INP001"]
+"examples/*" = ["N999", "T20", "S106", "D100", "D104", "TRY002", "FA100"]
+"tests/*" = ["S101", "S106", "S311", "SLF001", "ANN", "ARG", "D", "FA100"]
+
+[tool.mypy]
+ignore_missing_imports = true
+disallow_untyped_decorators = false
+plugins = ["pydantic.mypy"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
