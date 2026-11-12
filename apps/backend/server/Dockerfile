@@ -4,7 +4,7 @@ FROM ${REPO}python:3.13-slim AS environment
 
 # set to non-empty string to skip dev dependencies
 ARG PRODUCTION=
-ENV PDM_VERSION=2.26.2 \
+ENV PDM_VERSION=2.29.7 \
     PDM_HOME=/usr/local \
     PDM_CHECK_UPDATE=false \
     PIP_NO_CACHE_DIR=off \
@@ -19,7 +19,7 @@ RUN apt update \
     && apt-get install --no-install-recommends -y \
     curl \
     && rm -rf /var/lib/apt/lists/*
-RUN pip install -U pdm
+RUN python -m pip install "pdm==${PDM_VERSION}"
 # disable update check
 ENV PDM_CHECK_UPDATE=false
 
@@ -54,6 +54,7 @@ COPY migrations migrations
 COPY alembic.ini alembic.ini
 
 ENV PATH="/app/.venv/bin:$PATH"
+EXPOSE 8000
 
 # Override CMD at container runtime for tests. Campaign event listener ownership
 # is process-local, so Settings constrains UVICORN_WORKERS to 1. Scale by running
