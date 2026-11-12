@@ -4,7 +4,7 @@ FROM ${REPO}python:3.12-slim AS environment
 
 # set to non-empty string to skip dev dependencies
 ARG PRODUCTION=
-ENV PDM_VERSION=2.26.2 \
+ENV PDM_VERSION=2.29.7 \
     PDM_HOME=/usr/local \
     PDM_CHECK_UPDATE=false \
     PIP_NO_CACHE_DIR=off \
@@ -48,8 +48,9 @@ COPY . .
 COPY --from=builder /app/.venv /app/.venv
 
 ENV PATH="/app/.venv/bin:$PATH"
-ENV PORT=${PORT}
+# main.py reads PORT from the environment; an empty value would crash startup.
+ENV PORT=8100
+EXPOSE 8100
 
 # override CMD at container runtime for tests
-# note that you generally will NOT want to set UVICORN_WORKERS if running in a Kubernetes cluster, let Kubernetes handle that for you
-CMD ["sh", "-c", "python main.py --port $PORT"]
+CMD ["python", "main.py"]

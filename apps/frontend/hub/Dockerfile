@@ -5,7 +5,6 @@ ARG APP_NAME="hub"
 ARG NEXT_PUBLIC_VERSION
 
 # ENV Variables
-ENV PORT=${PORT}
 ENV PNPM_HOME="/pnpm"
 ENV PATH="$PNPM_HOME/bin:$PNPM_HOME:$PATH"
 
@@ -39,6 +38,9 @@ RUN pnpm dlx turbo run build --filter=${APP_NAME}... --concurrency=1
 FROM base AS runner
 WORKDIR /app
 
+ENV NODE_ENV=production \
+    PORT=3000 \
+    HOSTNAME=0.0.0.0
 
 # Don't run production as root
 RUN addgroup --system --gid 1001 nodejs
@@ -51,4 +53,6 @@ COPY --from=installer --chown=${APP_NAME}:nodejs /app/apps/frontend/${APP_NAME}/
 COPY --from=installer --chown=${APP_NAME}:nodejs /app/apps/frontend/${APP_NAME}/.next/static ./apps/frontend/${APP_NAME}/.next/static
 COPY --from=installer --chown=${APP_NAME}:nodejs /app/apps/frontend/${APP_NAME}/public ./apps/frontend/${APP_NAME}/public
 
-CMD node apps/frontend/hub/server.js
+EXPOSE 3000
+
+CMD ["node", "apps/frontend/hub/server.js"]
