@@ -1,0 +1,316 @@
+# Full iHub stack using the published images on GitHub Container Registry.
+# No source build is required; only the Nginx config in apps/backend/nginx_dev
+# is mounted from this checkout.
+#
+#   docker compose -f docker-compose.ghcr.yml up -d
+#   open http://localhost:8080/hub
+#
+# Defaults run in local `dev_bypass` auth mode with an in-stack broker and
+# campaign orchestrator. Override any ${VAR:-default} below via `.env` (see
+# .env.example). Pin a release with IHUB_VERSION (for example 0.118.2).
+
+# JupyterHub's DockerSpawner mounts volumes by their Compose-prefixed names
+# (ihub-services_ihub_projects, ...), so the project name must stay fixed.
+name: ihub-services
+
+services:
+  projects-volume-init:
+    container_name: ihub-projects-volume-init
+    image: busybox:1.36
+    command: sh -c "mkdir -p /projects && chown -R 1000:100 /projects && find /projects -type d -exec chmod 2775 {} + && find /projects -type f -exec chmod 0664 {} +"
+    restart: "no"
+    volumes:
+      - ihub_projects:/projects
+
+  nginx:
+    container_name: ihub-nginx
+    image: nginx:1.29
+    restart: always
+    environment:
+      PROJECT_FILE_UPLOAD_MAX_BYTES: ${PROJECT_FILE_UPLOAD_MAX_BYTES:-10485760}
+      NGINX_HUB_UPSTREAM: ihub-ui:3000
+      NGINX_MARKETPLACE_UPSTREAM: ihub-marketplace:3001
+      NGINX_SERVER_UPSTREAM: ihub-server:8000
+      NGINX_DOCS_UPSTREAM: ihub-docs:3002
+      NGINX_MCP_UPSTREAM: ihub-mcp:8100
+    volumes:
+      - ./apps/backend/nginx_dev/default.conf:/etc/nginx/default.conf.template:ro
+      # Run through sh so the bind-mounted script needs no executable bit.
+      - ./apps/backend/nginx_dev/render-upload-body-limit.sh:/usr/local/bin/render-upload-body-limit.sh:ro
+    entrypoint:
+      - sh
+      - -c
+      - sh /usr/local/bin/render-upload-body-limit.sh && exec /docker-entrypoint.sh nginx -g 'daemon off;'
+    ports:
+      - "${IHUB_HTTP_PORT:-8080}:8080"
+    depends_on:
+      server:
+        condition: service_healthy
+      ui:
+        condition: service_started
+      marketplace:
+        condition: service_started
+      docs:
+        condition: service_started
+      mcp:
+        condition: service_started
+      ihub-jupyterhub:
+        condition: service_started
+      ihub-keycloak:
+        condition: service_started
+    networks:
+      - internal
+
+  ui:
+    container_name: ihub-ui
+    image: ghcr.io/intersect-sdk/ihub-ui:${IHUB_VERSION:-latest}
+    restart: always
+    networks:
+      - internal
+
+  marketplace:
+    container_name: ihub-marketplace
+    image: ghcr.io/intersect-sdk/ihub-marketplace:${IHUB_VERSION:-latest}
+    restart: always
+    networks:
+      - internal
+
+  docs:
+    container_name: ihub-docs
+    image: ghcr.io/intersect-sdk/ihub-docs:${IHUB_VERSION:-latest}
+    restart: always
+    networks:
+      - internal
+
+  server:
+    container_name: ihub-server
+    image: ghcr.io/intersect-sdk/ihub-server:${IHUB_VERSION:-latest}
+    restart: always
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "python3",
+          "-c",
+          "import httpx; httpx.get('http://localhost:8000/openapi.json', timeout=5).raise_for_status()",
+        ]
+      interval: 10s
+      retries: 10
+      start_period: 20s
+      timeout: 10s
+    environment:
+      LOG_LEVEL: ${LOG_LEVEL:-INFO}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      AUTH_MODE: ${AUTH_MODE:-dev_bypass}
+      DEV_AUTH_EMAIL: ${DEV_AUTH_EMAIL:-dev.user@example.com}
+      DEV_AUTH_NAME: ${DEV_AUTH_NAME:-Dev User}
+      PROJECT_FILE_UPLOAD_MAX_BYTES: ${PROJECT_FILE_UPLOAD_MAX_BYTES:-10485760}
+      CORS_ORIGINS: '["*"]'
+      VERSION: ${IHUB_VERSION:-latest}
+      RESERVED_BROKER_QUEUE_NAME: ${RESERVED_BROKER_QUEUE_NAME:-ihub}
+      # Database
+      POSTGRESQL_USERNAME: ${POSTGRESQL_USERNAME:-ihub_username}
+      POSTGRESQL_PASSWORD: ${POSTGRESQL_PASSWORD:-ihub_password}
+      POSTGRESQL_HOST: ihub-database
+      POSTGRESQL_PORT: 5432
+      POSTGRESQL_DATABASE: ${POSTGRESQL_DATABASE:-ihub}
+      # Redis / Flowcept
+      REDIS_HOST: ihub-redis
+      REDIS_PORT: 6379
+      REDIS_DB: 0
+      REDIS_PROTOCOL: 3
+      REDIS_DECODE_RESPONSES: "True"
+      MQ_URI: ${MQ_URI:-redis://ihub-redis:6379}
+      KVDB_URI: ${KVDB_URI:-redis://ihub-redis:6379}
+      # JupyterHub
+      JH_ADMIN_TOKEN: ${JUYTER_HUB_ADMIN_TOKEN:-ihub_jupyter_hub_secret_key}
+      JH_HOST: http://ihub-jupyterhub:8000/ijupyterhub
+      # INTERSECT broker (auto-created and connected on startup)
+      BROKER_ENABLED: "true"
+      BROKER_HOST: ${BROKER_HOST:-ihub-broker}
+      BROKER_PORT: ${BROKER_PORT:-5672}
+      BROKER_USERNAME: ${BROKER_USERNAME:-intersect_username}
+      BROKER_PASSWORD: ${BROKER_PASSWORD:-intersect_password}
+      BROKER_PROTOCOL: ${BROKER_PROTOCOL:-amqp0.9.1}
+      BROKER_LABEL: ${BROKER_LABEL:-Dev INTERSECT Broker}
+      ORCHESTRATOR_URL: ${ORCHESTRATOR_URL:-http://ihub-campaign-orchestrator:8000}
+      ORCHESTRATOR_API_KEY: ${ORCHESTRATOR_API_KEY:-dev-api-key-12345678901234567890}
+      # OAuth / session (required by the settings model even in dev_bypass)
+      SESSION_SECRET: ${SESSION_SECRET:-dev-secret-changeme}
+      SCOPE: ${SCOPE:-openid email}
+      CLIENT_ID: ${CLIENT_ID:-dev-placeholder}
+      CLIENT_SECRET: ${CLIENT_SECRET:-dev-placeholder}
+      keycloak_authorize_url: ${keycloak_authorize_url:-http://ihub-keycloak:8080/auth/realms/master/protocol/openid-connect/auth}
+      keycloak_token_url: ${keycloak_token_url:-http://ihub-keycloak:8080/auth/realms/master/protocol/openid-connect/token}
+      keycloak_jwks_url: ${keycloak_jwks_url:-http://ihub-keycloak:8080/auth/realms/master/protocol/openid-connect/certs}
+      OAUTH_REDIRECT_URL: ${OAUTH_REDIRECT_URL:-http://localhost:8080/hub/auth}
+      OAUTH_CALLBACK_URL: ${OAUTH_CALLBACK_URL:-http://localhost:8080/api/v1/auth/callback}
+      OAUTH_UNAUTHORIZED_REDIRECT_URL: ${OAUTH_UNAUTHORIZED_REDIRECT_URL:-http://localhost:8080/hub/unauthorized}
+    depends_on:
+      database:
+        condition: service_healthy
+      redis:
+        condition: service_started
+      broker:
+        condition: service_healthy
+    networks:
+      - internal
+
+  mcp:
+    container_name: ihub-mcp
+    image: ghcr.io/intersect-sdk/ihub-mcp:${IHUB_VERSION:-latest}
+    restart: always
+    environment:
+      IHUB_SERVER_HOST: ihub-server
+      IHUB_SERVER_PORT: 8000
+    networks:
+      - internal
+
+  ihub-jupyterhub:
+    container_name: ihub-jupyterhub
+    image: ghcr.io/intersect-sdk/ihub-jupyterhub:${IHUB_VERSION:-latest}
+    restart: always
+    volumes:
+      # DockerSpawner launches one notebook container per user on the host.
+      - /var/run/docker.sock:/var/run/docker.sock:rw
+      - ihub_jupyter_data:/data
+      # Seeded from the image on first start, then mounted into user servers.
+      - ihub_jupyter_single_user_config:/single_user_config
+    environment:
+      DOCKER_NETWORK_NAME: ihub_internal_network
+      DOCKER_NOTEBOOK_IMAGE: ${DOCKER_NOTEBOOK_IMAGE:-quay.io/jupyterhub/singleuser:5.4.2}
+      DOCKER_NOTEBOOK_DIR: /home/jovyan/work
+      JUPYTER_PUBLIC_URL: ${JUPYTER_PUBLIC_URL:-http://localhost:8080/ijupyterhub}
+      JUPYTER_VALIDATE_CERT: ${JUPYTER_VALIDATE_CERT:-False}
+      JUPYTERHUB_SECURE_COOKIES: ${JUPYTERHUB_SECURE_COOKIES:-False}
+      JUPYTER_SECURE_COOKIES: ${JUPYTER_SECURE_COOKIES:-False}
+      AUTH_MODE: ${AUTH_MODE:-dev_bypass}
+      ENVIRONMENT: ${ENVIRONMENT:-development}
+      DEV_AUTH_EMAIL: ${DEV_AUTH_EMAIL:-dev.user@example.com}
+      DEV_AUTH_NAME: ${DEV_AUTH_NAME:-Dev User}
+      JH_ADMIN_TOKEN: ${JUYTER_HUB_ADMIN_TOKEN:-ihub_jupyter_hub_secret_key}
+      # Only read when AUTH_MODE=oauth
+      OAUTH_CLIENT_ID: ${CLIENT_ID:-}
+      OAUTH_CLIENT_SECRET: ${CLIENT_SECRET:-}
+      SCOPE: ${SCOPE:-openid email}
+      OAUTH_AUTHORIZE_URL: ${keycloak_authorize_url:-}
+      OAUTH_TOKEN_URL: ${keycloak_token_url:-}
+      OAUTH_USERDATA_URL: ${OAUTH_USERDATA_URL:-}
+      JUPYTER_OAUTH_CALLBACK_URL: ${JUPYTER_OAUTH_CALLBACK_URL:-}
+    depends_on:
+      projects-volume-init:
+        condition: service_completed_successfully
+    networks:
+      - internal
+
+  database:
+    container_name: ihub-database
+    image: bitnamilegacy/postgresql:17
+    environment:
+      POSTGRESQL_USERNAME: ${POSTGRESQL_USERNAME:-ihub_username}
+      POSTGRESQL_PASSWORD: ${POSTGRESQL_PASSWORD:-ihub_password}
+      POSTGRESQL_DATABASE: ${POSTGRESQL_DATABASE:-ihub}
+    healthcheck:
+      test: pg_isready -U "$${POSTGRESQL_USERNAME}" -d "$${POSTGRESQL_DATABASE}"
+      interval: 10s
+      retries: 5
+      start_period: 10s
+      timeout: 10s
+    volumes:
+      - ihub_postgresql_data:/bitnami/postgresql
+    networks:
+      - internal
+
+  redis:
+    container_name: ihub-redis
+    image: redis:8.6-trixie
+    restart: always
+    volumes:
+      - ihub_redis_data:/data
+    networks:
+      - internal
+
+  broker:
+    container_name: ihub-broker
+    image: bitnamilegacy/rabbitmq:4.1
+    restart: always
+    environment:
+      RABBITMQ_PLUGINS: "rabbitmq_management rabbitmq_mqtt"
+      RABBITMQ_USERNAME: ${BROKER_USERNAME:-intersect_username}
+      RABBITMQ_PASSWORD: ${BROKER_PASSWORD:-intersect_password}
+      RABBITMQ_MANAGEMENT_ALLOW_WEB_ACCESS: "yes"
+    healthcheck:
+      test: rabbitmq-diagnostics -q ping && rabbitmq-diagnostics -q check_running && rabbitmq-diagnostics -q check_local_alarms
+      interval: 10s
+      retries: 5
+      start_period: 10s
+      timeout: 10s
+    networks:
+      - internal
+
+  campaign-orchestrator:
+    container_name: ihub-campaign-orchestrator
+    image: ghcr.io/intersect-sdk/campaign-orchestrator:v0.1.4
+    restart: always
+    environment:
+      PRODUCTION: "true"
+      API_KEY: ${ORCHESTRATOR_API_KEY:-dev-api-key-12345678901234567890}
+      BROKER_HOST: ihub-broker
+      BROKER_PORT: "5672"
+      BROKER_USERNAME: ${BROKER_USERNAME:-intersect_username}
+      BROKER_PASSWORD: ${BROKER_PASSWORD:-intersect_password}
+      BROKER_PROTOCOL: amqp0.9.1
+      CAMPAIGN_REPOSITORY_BACKEND: memory
+    depends_on:
+      broker:
+        condition: service_healthy
+    networks:
+      - internal
+
+  random-number-service:
+    container_name: ihub-random-number-service
+    image: ghcr.io/intersect-sdk/campaign-orchestrator/random-number-service:v0.1.4
+    restart: always
+    environment:
+      BROKER_HOST: ihub-broker
+      BROKER_PORT: "5672"
+      BROKER_USERNAME: ${BROKER_USERNAME:-intersect_username}
+      BROKER_PASSWORD: ${BROKER_PASSWORD:-intersect_password}
+      BROKER_PROTOCOL: amqp0.9.1
+    depends_on:
+      broker:
+        condition: service_healthy
+    networks:
+      - internal
+
+  # Not used in dev_bypass mode; Nginx proxies /auth/ to it, so it must exist.
+  ihub-keycloak:
+    container_name: ihub-keycloak
+    image: quay.io/keycloak/keycloak:26.5
+    command: start-dev
+    environment:
+      KC_BOOTSTRAP_ADMIN_USERNAME: ${KEYCLOAK_STARTING_ADMIN_USERNAME:-admin}
+      KC_BOOTSTRAP_ADMIN_PASSWORD: ${KEYCLOAK_STARTING_ADMIN_PASSWORD:-changethispasswordforadmin}
+      KC_HTTP_RELATIVE_PATH: /auth
+      KC_PROXY_HEADERS: xforwarded
+      KC_SPI_HTML_CONTENT_SECURITY_POLICY: frame-src 'self' localhost:8080
+      KC_HOSTNAME: localhost
+      KC_HOSTNAME_STRICT: "false"
+    volumes:
+      - ihub_keycloak_data:/opt/keycloak/data
+    networks:
+      - internal
+
+# DockerSpawner attaches user servers to this network by name.
+networks:
+  internal:
+    name: ihub_internal_network
+    driver: bridge
+
+volumes:
+  ihub_postgresql_data:
+  ihub_redis_data:
+  ihub_jupyter_data:
+  ihub_jupyter_single_user_config:
+  ihub_keycloak_data:
+  ihub_projects:

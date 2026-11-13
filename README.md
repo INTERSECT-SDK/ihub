@@ -176,6 +176,18 @@ Stop the full stack:
 docker compose -f docker-compose.dev-full.yml down
 ```
 
+### Running the Published Images (GHCR)
+
+`docker-compose.ghcr.yml` runs the same full stack as dev-full from the images
+published to `ghcr.io/intersect-sdk/ihub-*` on each release tag, with no local
+build. It defaults to `dev_bypass` auth and publishes only the Nginx entrypoint.
+
+```
+IHUB_VERSION=0.118.2 docker compose -f docker-compose.ghcr.yml up
+```
+
+Then open [http://localhost:8080/hub](http://localhost:8080/hub)
+
 ### Starting Mock INTERSECT Capabilities
 
 Mock capabilities repository can be found here: https://code.ornl.gov/intersect/ihub/mock-capabilities.
