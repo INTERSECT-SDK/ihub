@@ -178,10 +178,8 @@ docker compose -f docker-compose.dev-full.yml down
 
 ### Running the Published Images (GHCR)
 
-`docker-compose.ghcr.yml` runs the same full stack as dev-full from the images
-published to `ghcr.io/intersect-sdk/ihub-*` on each release tag, with no local
-build. It defaults to `dev_bypass` auth and publishes only the Nginx entrypoint.
-
+`docker-compose.ghcr.yml` runs the same full stack as dev-full, using the released `ghcr.io/intersect-sdk/ihub-*` images (plus required third-party dependencies and orchestrator images) so you can run locally without building from source.
+It defaults to `dev_bypass` auth and only exposes the Nginx entrypoint (not intended for production use).
 ```
 IHUB_VERSION=0.118.2 docker compose -f docker-compose.ghcr.yml up
 ```
