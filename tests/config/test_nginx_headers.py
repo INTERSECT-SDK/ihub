@@ -8,12 +8,16 @@ import tempfile
 import time
 import unittest
 import uuid
+from http import HTTPStatus
+from http.client import HTTPMessage
 from pathlib import Path
+from urllib.parse import urljoin, urlsplit
 
 from test_ghcr import ROOT, isolated_environment
 
 IMAGE = "nginx:1.29"
 ROUTES = ("/hub/auth", "/api/v1/auth/login", "/ijupyterhub/hub/", "/auth/", "/")
+REDIRECT_ROUTES = ("/docs", "/ijupyterhub", "/auth", "/ihub_mcp")
 
 
 def docker(*arguments: str) -> str:
@@ -122,7 +126,10 @@ server {
                 time.sleep(0.1)
 
     @classmethod
-    def request(cls, path: str, host: str | None) -> dict:
+    def request_response(
+        cls, path: str, host: str | None
+    ) -> tuple[int, HTTPMessage, bytes]:
+        """Return the raw response without following redirects."""
         connection = http.client.HTTPConnection("127.0.0.1", cls.port, timeout=5)
         try:
             connection.putrequest("GET", path, skip_host=True)
@@ -130,12 +137,58 @@ server {
                 connection.putheader("Host", host)
             connection.endheaders()
             response = connection.getresponse()
-            body = response.read()
-            if response.status != 200:
-                raise AssertionError(f"Proxy returned {response.status}: {body!r}")
-            return json.loads(body)
+            return response.status, response.headers, response.read()
         finally:
             connection.close()
+
+    @classmethod
+    def request(cls, path: str, host: str | None) -> dict:
+        status, _, body = cls.request_response(path, host)
+        if status != HTTPStatus.OK:
+            raise AssertionError(f"Proxy returned {status}: {body!r}")
+        return json.loads(body)
+
+    def test_slash_redirects_preserve_relative_location_and_query(self) -> None:
+        for host in (
+            "localhost:8080",
+            "localhost:18080",
+            "example.test",
+            "[::1]:18080",
+        ):
+            for path in REDIRECT_ROUTES:
+                for query in ("", "?next=%2Fhub%3Fx%3D1&mode=login"):
+                    with self.subTest(host=host, path=path, query=query):
+                        status, headers, _ = self.request_response(path + query, host)
+                        self.assertEqual(status, HTTPStatus.MOVED_PERMANENTLY)
+                        self.assertEqual(headers["Location"], path + "/" + query)
+
+    def test_slash_redirects_follow_on_published_port(self) -> None:
+        authority = f"127.0.0.1:{self.port}"
+        for path in REDIRECT_ROUTES:
+            with self.subTest(path=path):
+                query = "?next=%2Fhub&mode=login"
+                url = f"http://{authority}{path}{query}"
+                status, headers, _ = self.request_response(path + query, authority)
+                self.assertEqual(status, HTTPStatus.MOVED_PERMANENTLY)
+                target = urlsplit(urljoin(url, headers["Location"]))
+                self.assertEqual(target.scheme, "http")
+                self.assertEqual(target.netloc, authority)
+                self.assertEqual(target.path, path + "/")
+                self.assertEqual("?" + target.query, query)
+                # Connect to the resolved URL, so a wrong port cannot be hidden
+                # by the fixture's request helper.
+                connection = http.client.HTTPConnection(target.netloc, timeout=5)
+                try:
+                    connection.request("GET", target.path + "?" + target.query)
+                    response = connection.getresponse()
+                    self.assertEqual(response.status, HTTPStatus.OK)
+                    body = json.loads(response.read())
+                    upstream_path = (
+                        "/" if path in ("/docs", "/ihub_mcp") else path + "/"
+                    )
+                    self.assertEqual(body["uri"], upstream_path + query)
+                finally:
+                    connection.close()
 
     def test_public_authority_on_all_affected_routes(self) -> None:
         for host, port in (
