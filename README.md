@@ -176,6 +176,53 @@ Stop the full stack:
 docker compose -f docker-compose.dev-full.yml down
 ```
 
+### Running the Published Images (GHCR)
+
+`docker-compose.ghcr.yml` runs the same full stack as dev-full, using the released `ghcr.io/intersect-sdk/ihub-*` images (plus required third-party dependencies and orchestrator images) so you can run locally without building from source.
+It defaults to `dev_bypass` auth and only exposes the Nginx entrypoint (not intended for production use).
+```
+IHUB_VERSION=0.118.2 docker compose -f docker-compose.ghcr.yml up
+```
+
+Then open [http://localhost:8080/hub](http://localhost:8080/hub).
+No `.env` file is required. To customize settings, copy the shared example:
+
+```sh
+cp .env.example .env
+```
+
+For a custom GHCR port, set `IHUB_HTTP_PORT` in `.env` or in the shell:
+
+```sh
+IHUB_HTTP_PORT=18080 docker compose -f docker-compose.ghcr.yml up -d
+```
+
+Open [http://localhost:18080/hub](http://localhost:18080/hub). The default
+OAuth redirect, callback, unauthorized-page, and Jupyter public/callback URLs
+follow `IHUB_HTTP_PORT` (default `8080`), including with a copied `.env.example`.
+The lightweight and dev-full stacks continue to publish port `8080`.
+
+For another hostname or an external proxy, set explicit `OAUTH_REDIRECT_URL`,
+`OAUTH_CALLBACK_URL`, `OAUTH_UNAUTHORIZED_REDIRECT_URL`, `JUPYTER_PUBLIC_URL`,
+and `JUPYTER_OAUTH_CALLBACK_URL` values. Shell values take precedence over
+`.env`, and explicit URL values take precedence over port-derived defaults.
+
+Update existing `.env` files separately: changing `.env.example` does not
+repair a literal `changeme` URL or a URL fixed to an old port. Use the public
+URL entries from the current example. Provider credentials and endpoints marked
+OAuth-only are unused in `dev_bypass`; configure them when enabling OAuth.
+Replace all development URLs, secrets, and provider credentials before using a
+production deployment.
+
+Configuration regression checks (Python standard library and Docker Compose;
+the Nginx header test also needs a running Docker daemon and a local
+`nginx:1.29` image, fetched with `docker pull nginx:1.29`):
+
+```sh
+python3 -m unittest discover -s tests/config -v
+node --test apps/frontend/hub/src/app/project/nginx-upload-limit.test.ts
+```
+
 ### Starting Mock INTERSECT Capabilities
 
 Mock capabilities repository can be found here: https://code.ornl.gov/intersect/ihub/mock-capabilities.
