@@ -238,63 +238,6 @@ def test_base64_upload_authorizes_checks_metadata_and_forwards_payload_unchanged
 
 
 @pytest.mark.parametrize("method", ["post", "put"])
-def test_text_save_skips_project_authorization_and_forwards_payload_unchanged(
-    client,
-    app,
-    monkeypatch,
-    method,
-):
-    payload = {
-        "type": "file",
-        "format": "text",
-        "content": "ordinary Jupyter contents save",
-    }
-    path = "notebooks/ordinary.txt"
-    content_service = UploadContentService()
-    redis_accesses = 0
-
-    def fail_redis_access():
-        nonlocal redis_accesses
-        redis_accesses += 1
-        raise AssertionError("text saves must not access Redis")
-
-    class FailingProjectService:
-        def resolve_user_by_email(self, _email):
-            raise AssertionError("text saves must not resolve a project user")
-
-        def require_edit_access(self, _project_id, _user_id):
-            raise AssertionError("text saves must not authorize project access")
-
-    monkeypatch.setattr(app.state.redis, "json", fail_redis_access)
-    app.dependency_overrides[get_content_service] = lambda: content_service
-    app.dependency_overrides[get_project_service] = lambda: FailingProjectService()
-    client.cookies.set("IHUB_SESSION", "ordinary-save-session")
-    try:
-        response = getattr(client, method)(
-            f"/api/v1/contents/save/{path}",
-            params=PARAMS,
-            headers=HEADERS,
-            json=payload,
-        )
-    finally:
-        app.dependency_overrides.clear()
-
-    assert response.status_code == 200
-    assert response.json() == {"path": path}
-    assert redis_accesses == 0
-    assert content_service.read_calls == []
-    assert content_service.save_calls == [
-        (
-            "http://testserver/ijupyterhub/",
-            path,
-            payload,
-            "user@example.com",
-            "exact-jupyter-token",
-        )
-    ]
-
-
-@pytest.mark.parametrize("method", ["post", "put"])
 def test_text_save_skips_project_authorization_and_forwards_to_user_server(
     client,
     app,
