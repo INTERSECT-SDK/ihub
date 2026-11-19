@@ -15,6 +15,7 @@ from starlette.background import BackgroundTask
 from starlette.responses import StreamingResponse
 
 from ihub_server.api.deps import (
+    Principal,
     PrincipalDep,
     ProjectServiceDep,
     ProjectUploadDependencies,
@@ -64,13 +65,8 @@ project_upload_dependencies_dep = Depends(get_project_upload_dependencies)
 content_body = Body(...)
 
 
-async def get_upload_user(
-    request: Request,
-    content: dict = content_body,
-) -> dict[str, Any] | None:
-    """Resolve session identity only for base64 project-file uploads."""
-    if content.get("format") != "base64":
-        return None
+async def get_upload_user(request: Request) -> dict[str, Any] | None:
+    """Resolve the session identity for every save request."""
     return await get_user(request)
 
 
@@ -148,11 +144,12 @@ async def read_content(
     req: Request,
     path: str,
     jupyter_user: str,
+    principal: PrincipalDep,
     content_service: "ContentService" = content_service_dep,
     jupyterhub_service: "JupyterHubService" = jupyterhub_service_dep,
 ):
-    """Retrieve content from the supplied JupyterHub user's contents API."""
-    normalized_jupyter_user = _jupyter_user(jupyter_user)
+    """Retrieve content from the authenticated user's contents API."""
+    normalized_jupyter_user = _require_own_jupyter_user(jupyter_user, principal)
     jupyter_token = await _jupyter_token(
         req,
         normalized_jupyter_user,
@@ -195,16 +192,10 @@ async def save_content(
     upload_dependencies: ProjectUploadDependencies = project_upload_dependencies_dep,
 ):
     """Save a Jupyter-compatible contents payload to the user server."""
-    normalized_jupyter_user = _jupyter_user(jupyter_user)
+    principal = get_principal(user)
+    save_jupyter_user = _require_own_jupyter_user(jupyter_user, principal)
     is_base64_upload = content.get("format") == "base64"
     if is_base64_upload:
-        principal = get_principal(user)
-        if normalized_jupyter_user.casefold() != principal.email.casefold():
-            raise HTTPException(
-                status_code=403,
-                detail="Jupyter user must match authenticated user.",
-            )
-
         try:
             project_id = _project_id_from_save_path(path)
             user_id = upload_dependencies.project_service.resolve_user_by_email(principal.email)
@@ -213,7 +204,6 @@ async def save_content(
         except ServiceError as exc:
             raise _http_exception(exc) from exc
 
-    save_jupyter_user = principal.email if is_base64_upload else normalized_jupyter_user
     jupyter_token = await _jupyter_token(
         req,
         save_jupyter_user,
@@ -319,12 +309,13 @@ async def delete_content(
     req: Request,
     path: str,
     jupyter_user: str,
+    principal: PrincipalDep,
     jupyter_server_url: str | None = None,
     content_service: "ContentService" = content_service_dep,
     jupyterhub_service: "JupyterHubService" = jupyterhub_service_dep,
 ):
-    """Delete content from the supplied JupyterHub user's contents API."""
-    normalized_jupyter_user = _jupyter_user(jupyter_user)
+    """Delete content from the authenticated user's contents API."""
+    normalized_jupyter_user = _require_own_jupyter_user(jupyter_user, principal)
     jupyter_token = await _jupyter_token(
         req,
         normalized_jupyter_user,
@@ -351,11 +342,12 @@ async def get_files(
     req: Request,
     project: str,
     jupyter_user: str,
+    principal: PrincipalDep,
     content_service: "ContentService" = content_service_dep,
     jupyterhub_service: "JupyterHubService" = jupyterhub_service_dep,
 ):
-    """Retrieve a directory model from the user's Jupyter contents API."""
-    normalized_jupyter_user = _jupyter_user(jupyter_user)
+    """Retrieve a directory model from the authenticated user's contents API."""
+    normalized_jupyter_user = _require_own_jupyter_user(jupyter_user, principal)
     jupyter_token = await _jupyter_token(
         req,
         normalized_jupyter_user,
@@ -414,6 +406,20 @@ def _jupyter_user(jupyter_user: str) -> str:
         return normalized_jupyter_user
 
     raise HTTPException(status_code=422, detail="Jupyter user is required.")
+
+
+def _require_own_jupyter_user(jupyter_user: str, principal: Principal) -> str:
+    """Return the caller's Jupyter user, rejecting requests for another user's server.
+
+    Token lookup falls back to minting a user token with the JupyterHub admin
+    token, so the target user must never come from the client alone.
+    """
+    if _jupyter_user(jupyter_user).casefold() != principal.email.casefold():
+        raise HTTPException(
+            status_code=403,
+            detail="Jupyter user must match authenticated user.",
+        )
+    return principal.email
 
 
 def _project_id_from_save_path(path: str) -> UUID:

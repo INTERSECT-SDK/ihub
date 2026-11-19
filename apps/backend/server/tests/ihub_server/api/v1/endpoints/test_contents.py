@@ -2,6 +2,7 @@ from uuid import UUID
 
 import pytest
 
+import ihub_server.api.v1.endpoints.contents as contents_endpoint
 import ihub_server.services.contents as contents_module
 from ihub_server.api.deps import (
     Principal,
@@ -43,6 +44,11 @@ def authorize_default_project_saves(app):
         subject_id=str(USER_ID),
         email="user@example.com",
     )
+    app.dependency_overrides[contents_endpoint.get_upload_user] = lambda: {
+        "subject_id": str(USER_ID),
+        "email": "user@example.com",
+        "role": "user",
+    }
     app.dependency_overrides[get_project_service] = lambda: FakeProjectService()
     yield
     app.dependency_overrides.clear()
@@ -1210,3 +1216,74 @@ def test_download_content_translates_service_errors(client, app, error, status_c
         app.dependency_overrides.clear()
 
     assert response.status_code == status_code
+
+
+class UnexpectedJupyterHubService:
+    """Fails the test if a request reaches Jupyter token minting."""
+
+    async def create_user_token_if_exists(self, _user_id):
+        raise AssertionError("token lookup should not be attempted")
+
+
+class UnexpectedContentService:
+    """Fails the test if a request reaches the upstream Jupyter contents API."""
+
+    async def read_content(self, *_args, **_kwargs):
+        raise AssertionError("upstream request should not be attempted")
+
+    async def save_content(self, *_args, **_kwargs):
+        raise AssertionError("upstream request should not be attempted")
+
+    async def delete_content(self, *_args, **_kwargs):
+        raise AssertionError("upstream request should not be attempted")
+
+    async def get_files(self, *_args, **_kwargs):
+        raise AssertionError("upstream request should not be attempted")
+
+
+# Routes that act on a named user's Jupyter server. Each must require an
+# authenticated iHub session and only act on that session's own server.
+USER_SCOPED_CONTENT_REQUESTS = [
+    pytest.param("get", "/api/v1/contents/read/projects/project-123/demo.txt", None, id="read"),
+    pytest.param("get", "/api/v1/contents/files/projects/project-123", None, id="files"),
+    pytest.param(
+        "delete", "/api/v1/contents/delete/projects/project-123/demo.txt", None, id="delete"
+    ),
+    pytest.param(
+        "put",
+        f"/api/v1/contents/save/projects/{PROJECT_ID}/demo.txt",
+        {"type": "file", "format": "text", "content": "demo"},
+        id="save-text",
+    ),
+]
+
+
+@pytest.mark.parametrize(("method", "route", "body"), USER_SCOPED_CONTENT_REQUESTS)
+def test_user_scoped_contents_routes_reject_anonymous_callers(client, app, method, route, body):
+    """Anonymous callers must not get admin-minted tokens for a named user."""
+    app.dependency_overrides.pop(get_principal)
+    app.dependency_overrides.pop(contents_endpoint.get_upload_user)
+    app.dependency_overrides[get_jupyterhub_service] = lambda: UnexpectedJupyterHubService()
+    app.dependency_overrides[get_content_service] = lambda: UnexpectedContentService()
+    request_kwargs = {"params": {"jupyter_user": "victim@example.com"}}
+    if body is not None:
+        request_kwargs["json"] = body
+
+    response = client.request(method, route, **request_kwargs)
+
+    assert response.status_code == 401
+
+
+@pytest.mark.parametrize(("method", "route", "body"), USER_SCOPED_CONTENT_REQUESTS)
+def test_user_scoped_contents_routes_reject_other_users_server(client, app, method, route, body):
+    """Authenticated callers must not act on another user's Jupyter server."""
+    app.dependency_overrides[get_jupyterhub_service] = lambda: UnexpectedJupyterHubService()
+    app.dependency_overrides[get_content_service] = lambda: UnexpectedContentService()
+    request_kwargs = {"params": {"jupyter_user": "victim@example.com"}}
+    if body is not None:
+        request_kwargs["json"] = body
+
+    response = client.request(method, route, **request_kwargs)
+
+    assert response.status_code == 403
+    assert response.json() == {"detail": "Jupyter user must match authenticated user."}
