@@ -1,6 +1,6 @@
 {
   "name": "ihub",
-  "version": "0.118.3",
+  "version": "0.118.4",
   "private": true,
   "contributors": [
     {
@@ -41,7 +41,7 @@
     "turbo": "^2.10.12",
     "typescript": "^7.0.2"
   },
-  "packageManager": "pnpm@12.4.1",
+  "packageManager": "pnpm@12.21.0",
   "engines": {
     "node": ">=18"
   }
