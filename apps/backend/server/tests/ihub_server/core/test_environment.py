@@ -89,3 +89,32 @@ def test_seed_broker_connection_returns_configured_values(monkeypatch):
         password="pass",
         protocol="amqp0.9.1",
     )
+
+
+_KEYCLOAK_SETTINGS = (
+    "keycloak_authorize_url",
+    "keycloak_token_url",
+    "keycloak_jwks_url",
+    "SCOPE",
+    "CLIENT_ID",
+    "CLIENT_SECRET",
+)
+
+
+def test_keycloak_settings_are_optional_in_dev_bypass(monkeypatch):
+    monkeypatch.setenv("AUTH_MODE", "dev_bypass")
+    for name in _KEYCLOAK_SETTINGS:
+        monkeypatch.delenv(name, raising=False)
+
+    settings = Settings(_env_file=None)
+
+    assert settings.CLIENT_ID is None
+
+
+def test_oauth_mode_requires_keycloak_settings(monkeypatch):
+    monkeypatch.setenv("AUTH_MODE", "oauth")
+    monkeypatch.delenv("CLIENT_SECRET", raising=False)
+    monkeypatch.delenv("keycloak_jwks_url", raising=False)
+
+    with pytest.raises(ValidationError, match="CLIENT_SECRET, keycloak_jwks_url"):
+        Settings(_env_file=None)
