@@ -66,12 +66,13 @@ class Settings(BaseSettings):
     POSTGRESQL_DATABASE: str
 
     SESSION_SECRET: str
-    keycloak_authorize_url: str
-    keycloak_token_url: str
-    SCOPE: str
-    CLIENT_ID: str
-    CLIENT_SECRET: str
-    keycloak_jwks_url: str
+    # Keycloak settings are only required when AUTH_MODE=oauth.
+    keycloak_authorize_url: str | None = None
+    keycloak_token_url: str | None = None
+    SCOPE: str | None = None
+    CLIENT_ID: str | None = None
+    CLIENT_SECRET: str | None = None
+    keycloak_jwks_url: str | None = None
     OAUTH_REDIRECT_URL: str
     OAUTH_CALLBACK_URL: str
     OAUTH_UNAUTHORIZED_REDIRECT_URL: str = "http://localhost:8080/hub/unauthorized"
@@ -103,6 +104,24 @@ class Settings(BaseSettings):
     def _require_seed_broker_connection(self) -> Self:
         if self.BROKER_ENABLED:
             self.seed_broker_connection()
+        return self
+
+    @model_validator(mode="after")
+    def _require_keycloak_settings(self) -> Self:
+        if self.AUTH_MODE != "oauth":
+            return self
+        keycloak_settings = (
+            "keycloak_authorize_url",
+            "keycloak_token_url",
+            "SCOPE",
+            "CLIENT_ID",
+            "CLIENT_SECRET",
+            "keycloak_jwks_url",
+        )
+        missing = [name for name in keycloak_settings if getattr(self, name) is None]
+        if missing:
+            msg = f"AUTH_MODE=oauth requires {', '.join(missing)} to be set"
+            raise ValueError(msg)
         return self
 
     @property
