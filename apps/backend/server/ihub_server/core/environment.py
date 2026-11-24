@@ -67,12 +67,12 @@ class Settings(BaseSettings):
 
     SESSION_SECRET: str
     # Keycloak settings are only required when AUTH_MODE=oauth.
-    keycloak_authorize_url: str | None = None
-    keycloak_token_url: str | None = None
+    KEYCLOAK_AUTHORIZE_URL: str | None = None
+    KEYCLOAK_TOKEN_URL: str | None = None
     SCOPE: str | None = None
     CLIENT_ID: str | None = None
     CLIENT_SECRET: str | None = None
-    keycloak_jwks_url: str | None = None
+    KEYCLOAK_JWKS_URL: str | None = None
     OAUTH_REDIRECT_URL: str
     OAUTH_CALLBACK_URL: str
     OAUTH_UNAUTHORIZED_REDIRECT_URL: str = "http://localhost:8080/hub/unauthorized"
@@ -111,12 +111,12 @@ class Settings(BaseSettings):
         if self.AUTH_MODE != "oauth":
             return self
         keycloak_settings = (
-            "keycloak_authorize_url",
-            "keycloak_token_url",
+            "KEYCLOAK_AUTHORIZE_URL",
+            "KEYCLOAK_TOKEN_URL",
             "SCOPE",
             "CLIENT_ID",
             "CLIENT_SECRET",
-            "keycloak_jwks_url",
+            "KEYCLOAK_JWKS_URL",
         )
         missing = [name for name in keycloak_settings if getattr(self, name) is None]
         if missing:

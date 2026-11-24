@@ -92,9 +92,9 @@ def test_seed_broker_connection_returns_configured_values(monkeypatch):
 
 
 _KEYCLOAK_SETTINGS = (
-    "keycloak_authorize_url",
-    "keycloak_token_url",
-    "keycloak_jwks_url",
+    "KEYCLOAK_AUTHORIZE_URL",
+    "KEYCLOAK_TOKEN_URL",
+    "KEYCLOAK_JWKS_URL",
     "SCOPE",
     "CLIENT_ID",
     "CLIENT_SECRET",
@@ -114,7 +114,7 @@ def test_keycloak_settings_are_optional_in_dev_bypass(monkeypatch):
 def test_oauth_mode_requires_keycloak_settings(monkeypatch):
     monkeypatch.setenv("AUTH_MODE", "oauth")
     monkeypatch.delenv("CLIENT_SECRET", raising=False)
-    monkeypatch.delenv("keycloak_jwks_url", raising=False)
+    monkeypatch.delenv("KEYCLOAK_JWKS_URL", raising=False)
 
-    with pytest.raises(ValidationError, match="CLIENT_SECRET, keycloak_jwks_url"):
+    with pytest.raises(ValidationError, match="CLIENT_SECRET, KEYCLOAK_JWKS_URL"):
         Settings(_env_file=None)

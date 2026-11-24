@@ -23,12 +23,12 @@ oauth_config = Config(environ={})
 oauth_session = OAuth(oauth_config)
 oauth_session.register(
     "keycloak",
-    authorize_url=settings.keycloak_authorize_url,
-    access_token_url=settings.keycloak_token_url,
+    authorize_url=settings.KEYCLOAK_AUTHORIZE_URL,
+    access_token_url=settings.KEYCLOAK_TOKEN_URL,
     scope=settings.SCOPE,
     client_id=settings.CLIENT_ID,
     client_secret=settings.CLIENT_SECRET,
-    jwks_uri=settings.keycloak_jwks_url,
+    jwks_uri=settings.KEYCLOAK_JWKS_URL,
 )
 
 

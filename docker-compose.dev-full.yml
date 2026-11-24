@@ -173,7 +173,7 @@ services:
       REDIS_DECODE_RESPONSES: "True"
       MQ_URI: ${MQ_URI:-redis://ihub-redis:6379}
       KVDB_URI: ${KVDB_URI:-redis://ihub-redis:6379}
-      JH_ADMIN_TOKEN: ${JUYTER_HUB_ADMIN_TOKEN}
+      JH_ADMIN_TOKEN: ${JUPYTER_HUB_ADMIN_TOKEN}
       JH_HOST: http://ihub-jupyterhub:8000/ijupyterhub
       VERSION: DEV
       # Broker settings
@@ -192,9 +192,9 @@ services:
       SCOPE: "openid email"
       CLIENT_ID: dev-placeholder
       CLIENT_SECRET: dev-placeholder
-      keycloak_authorize_url: http://ihub-keycloak:8080/auth/realms/master/protocol/openid-connect/auth
-      keycloak_token_url: http://ihub-keycloak:8080/auth/realms/master/protocol/openid-connect/token
-      keycloak_jwks_url: http://ihub-keycloak:8080/auth/realms/master/protocol/openid-connect/certs
+      KEYCLOAK_AUTHORIZE_URL: http://ihub-keycloak:8080/auth/realms/master/protocol/openid-connect/auth
+      KEYCLOAK_TOKEN_URL: http://ihub-keycloak:8080/auth/realms/master/protocol/openid-connect/token
+      KEYCLOAK_JWKS_URL: http://ihub-keycloak:8080/auth/realms/master/protocol/openid-connect/certs
       OAUTH_REDIRECT_URL: http://localhost:8080/hub/auth
       OAUTH_CALLBACK_URL: http://localhost:8080/api/v1/auth/callback
       OAUTH_UNAUTHORIZED_REDIRECT_URL: http://localhost:8080/hub/unauthorized
@@ -293,8 +293,8 @@ services:
       OAUTH_CLIENT_ID: ${CLIENT_ID}
       OAUTH_CLIENT_SECRET: ${CLIENT_SECRET}
       SCOPE: ${SCOPE}
-      OAUTH_AUTHORIZE_URL: ${keycloak_authorize_url}
-      OAUTH_TOKEN_URL: ${keycloak_token_url}
+      OAUTH_AUTHORIZE_URL: ${KEYCLOAK_AUTHORIZE_URL}
+      OAUTH_TOKEN_URL: ${KEYCLOAK_TOKEN_URL}
       OAUTH_USERDATA_URL: ${OAUTH_USERDATA_URL}
       JUPYTER_OAUTH_CALLBACK_URL: ${JUPYTER_OAUTH_CALLBACK_URL}
       JUPYTER_PUBLIC_URL: ${JUPYTER_PUBLIC_URL}
@@ -305,7 +305,7 @@ services:
       ENVIRONMENT: ${ENVIRONMENT:-development}
       DEV_AUTH_EMAIL: ${DEV_AUTH_EMAIL:-dev.user@example.com}
       DEV_AUTH_NAME: ${DEV_AUTH_NAME:-Local Dev User}
-      JH_ADMIN_TOKEN: ${JUYTER_HUB_ADMIN_TOKEN}
+      JH_ADMIN_TOKEN: ${JUPYTER_HUB_ADMIN_TOKEN}
 
   ihub-keycloak:
     container_name: ihub-keycloak
