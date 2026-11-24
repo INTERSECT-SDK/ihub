@@ -16,6 +16,23 @@ healthcheck_service_dep = Depends(get_healthcheck_service)
 
 
 @router.get(
+    "/healthcheck/live",
+    tags=["Healthcheck"],
+    description="Liveness probe: the process is up; does not check dependencies",
+)
+async def healthcheck_live() -> dict[str, str]:
+    """Kubernetes liveness probe; use /healthcheck for readiness.
+
+    /healthcheck fails when dependencies are down, like broker,
+    which would signal that ihub is not live when broker is down.
+
+    Thus, need this separate liveness probe endpoint
+    that only checks if the process is running.
+    """
+    return {"status": "ok"}
+
+
+@router.get(
     "/healthcheck",
     tags=["Healthcheck"],
     description="Application healthcheck",
