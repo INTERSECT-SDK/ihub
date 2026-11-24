@@ -115,14 +115,12 @@ services:
       POSTGRESQL_HOST: ihub-database
       POSTGRESQL_PORT: 5432
       POSTGRESQL_DATABASE: ${POSTGRESQL_DATABASE:-ihub}
-      # Redis / Flowcept
+      # Redis
       REDIS_HOST: ihub-redis
       REDIS_PORT: 6379
       REDIS_DB: 0
       REDIS_PROTOCOL: 3
       REDIS_DECODE_RESPONSES: "True"
-      MQ_URI: ${MQ_URI:-redis://ihub-redis:6379}
-      KVDB_URI: ${KVDB_URI:-redis://ihub-redis:6379}
       # JupyterHub
       JH_ADMIN_TOKEN: ${JUPYTER_HUB_ADMIN_TOKEN:-ihub_jupyter_hub_secret_key}
       JH_HOST: http://ihub-jupyterhub:8000/ijupyterhub

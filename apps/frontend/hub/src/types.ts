@@ -323,7 +323,6 @@ export type ActionEdge = {}
 export type ChatMessage = {
   message: BaseMessageLike & [string, string]
   display: boolean
-  flowcept?: boolean
 }
 
 export enum Role {

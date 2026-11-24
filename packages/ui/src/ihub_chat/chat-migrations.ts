@@ -526,7 +526,6 @@ export function createUserMessage(
     messageType: attachments.length ? 'rich' : 'text',
     status: 'complete',
     display: true,
-    flowcept: false,
   }
 }
 

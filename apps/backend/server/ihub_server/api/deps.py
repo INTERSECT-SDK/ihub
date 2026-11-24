@@ -19,7 +19,6 @@ from ihub_server.services.campaign_transport import OrchestratorCampaignTranspor
 from ihub_server.services.capabilities import CapabilityService
 from ihub_server.services.chat import ChatService
 from ihub_server.services.contents import ContentService
-from ihub_server.services.flowcept import FlowceptService
 from ihub_server.services.healthcheck import HealthcheckService
 from ihub_server.services.jupyter_servers import JupyterServerService
 from ihub_server.services.jupyterhub import JupyterHubService
@@ -140,11 +139,6 @@ def get_upload_lock_manager(connection: HTTPConnection) -> UploadLockManager:
     return connection.app.state.upload_lock_manager
 
 
-def get_flowcept_service(session: SessionDep) -> FlowceptService:
-    """Create a Flowcept service bound to the current database session."""
-    return FlowceptService(session)
-
-
 def get_llm_service(session: SessionDep) -> LLMService:
     """Create an LLM service bound to the current database session."""
     return LLMService(session)
@@ -235,7 +229,6 @@ ChatServiceDep = Annotated[ChatService, Depends(get_chat_service)]
 JupyterServerServiceDep = Annotated[JupyterServerService, Depends(get_jupyter_server_service)]
 ContentServiceDep = Annotated[ContentService, Depends(get_content_service)]
 UploadLockManagerDep = Annotated[UploadLockManager, Depends(get_upload_lock_manager)]
-FlowceptServiceDep = Annotated[FlowceptService, Depends(get_flowcept_service)]
 LLMServiceDep = Annotated[LLMService, Depends(get_llm_service)]
 MCPServerServiceDep = Annotated[MCPServerService, Depends(get_mcp_server_service)]
 RemoteAgentServerServiceDep = Annotated[

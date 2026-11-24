@@ -42,7 +42,6 @@ from .campaign_run import (
     CampaignRunStatus,
 )
 from .capability import Capability, CapabilityCreate, CapabilityPublic, CapabilityUpdate
-from .flowcept_message import FlowceptMessage, FlowceptMessageCreate, FlowceptMessagePublic
 from .jupyter_server import JupyterCreate, JupyterPublic, JupyterServer, JupyterUpdate
 from .lifecycle_message import (
     LifecycleMessage,

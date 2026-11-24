@@ -224,7 +224,6 @@ export function chatMessageReducer(
         messageType: 'text',
         status: 'streaming',
         display: true,
-        flowcept: false,
       }
 
       return {

@@ -171,8 +171,6 @@ services:
       REDIS_DB: 0
       REDIS_PROTOCOL: 3
       REDIS_DECODE_RESPONSES: "True"
-      MQ_URI: ${MQ_URI:-redis://ihub-redis:6379}
-      KVDB_URI: ${KVDB_URI:-redis://ihub-redis:6379}
       JH_ADMIN_TOKEN: ${JUPYTER_HUB_ADMIN_TOKEN}
       JH_HOST: http://ihub-jupyterhub:8000/ijupyterhub
       VERSION: DEV
