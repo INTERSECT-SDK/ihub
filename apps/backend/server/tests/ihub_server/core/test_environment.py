@@ -91,6 +91,19 @@ def test_seed_broker_connection_returns_configured_values(monkeypatch):
     )
 
 
+_KEYCLOAK_URLS = (
+    "KEYCLOAK_AUTHORIZE_URL",
+    "KEYCLOAK_TOKEN_URL",
+    "KEYCLOAK_JWKS_URL",
+)
+
+
+@pytest.fixture(autouse=True)
+def clear_legacy_keycloak_urls(monkeypatch):
+    for name in _KEYCLOAK_URLS:
+        monkeypatch.delenv(name.lower(), raising=False)
+
+
 _KEYCLOAK_SETTINGS = (
     "KEYCLOAK_AUTHORIZE_URL",
     "KEYCLOAK_TOKEN_URL",
@@ -109,6 +122,8 @@ def test_keycloak_settings_are_optional_in_dev_bypass(monkeypatch):
     settings = Settings(_env_file=None)
 
     assert settings.CLIENT_ID is None
+    for name in _KEYCLOAK_URLS:
+        assert getattr(settings, name) is None
 
 
 def test_oauth_mode_requires_keycloak_settings(monkeypatch):
@@ -118,3 +133,60 @@ def test_oauth_mode_requires_keycloak_settings(monkeypatch):
 
     with pytest.raises(ValidationError, match="CLIENT_SECRET, KEYCLOAK_JWKS_URL"):
         Settings(_env_file=None)
+
+
+@pytest.mark.parametrize("source", ["environment", "dotenv"])
+@pytest.mark.parametrize(
+    "scenario",
+    ["legacy", "canonical", "mixed", "conflict", "empty_canonical"],
+)
+def test_keycloak_url_aliases(monkeypatch, tmp_path, source, scenario):
+    monkeypatch.setenv("AUTH_MODE", "oauth")
+    variables = {}
+    expected = {}
+    for index, name in enumerate(_KEYCLOAK_URLS):
+        # Remove conftest's canonical values so legacy-only and dotenv cases
+        # actually exercise the aliases rather than inheriting valid settings.
+        monkeypatch.delenv(name, raising=False)
+        legacy_value = f"https://legacy.example.test/{name.lower()}"
+        canonical_value = f"https://canonical.example.test/{name.lower()}"
+        if scenario in {"legacy", "conflict", "empty_canonical"} or (
+            scenario == "mixed" and index % 2 == 0
+        ):
+            variables[name.lower()] = legacy_value
+            expected[name] = legacy_value
+        if scenario in {"canonical", "conflict"} or (scenario == "mixed" and index % 2 == 1):
+            variables[name] = canonical_value
+            expected[name] = canonical_value
+        if scenario == "empty_canonical":
+            variables[name] = ""
+
+    env_file = None
+    if source == "environment":
+        for name, value in variables.items():
+            monkeypatch.setenv(name, value)
+    else:
+        env_file = tmp_path / ".env"
+        env_file.write_text("\n".join(f"{name}={value}" for name, value in variables.items()))
+
+    settings = Settings(_env_file=env_file)
+
+    for name, value in expected.items():
+        assert getattr(settings, name) == value
+
+
+@pytest.mark.parametrize("source", ["environment", "dotenv"])
+@pytest.mark.parametrize("name", _KEYCLOAK_URLS)
+def test_oauth_rejects_empty_keycloak_url_aliases(monkeypatch, tmp_path, source, name):
+    monkeypatch.setenv("AUTH_MODE", "oauth")
+    monkeypatch.delenv(name, raising=False)
+    env_file = None
+    if source == "environment":
+        monkeypatch.setenv(name, "")
+        monkeypatch.setenv(name.lower(), "")
+    else:
+        env_file = tmp_path / ".env"
+        env_file.write_text(f"{name}=\n{name.lower()}=\n")
+
+    with pytest.raises(ValidationError, match=name):
+        Settings(_env_file=env_file)

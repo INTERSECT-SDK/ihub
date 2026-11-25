@@ -2,7 +2,7 @@ from dataclasses import dataclass
 from typing import Literal, Self
 
 from intersect_sdk_common import ControlProvider
-from pydantic import Field, PositiveInt, model_validator
+from pydantic import AliasChoices, Field, PositiveInt, model_validator
 from pydantic_settings import (
     BaseSettings,
     SettingsConfigDict,
@@ -67,12 +67,21 @@ class Settings(BaseSettings):
 
     SESSION_SECRET: str
     # Keycloak settings are only required when AUTH_MODE=oauth.
-    KEYCLOAK_AUTHORIZE_URL: str | None = None
-    KEYCLOAK_TOKEN_URL: str | None = None
+    KEYCLOAK_AUTHORIZE_URL: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("KEYCLOAK_AUTHORIZE_URL", "keycloak_authorize_url"),
+    )
+    KEYCLOAK_TOKEN_URL: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("KEYCLOAK_TOKEN_URL", "keycloak_token_url"),
+    )
     SCOPE: str | None = None
     CLIENT_ID: str | None = None
     CLIENT_SECRET: str | None = None
-    KEYCLOAK_JWKS_URL: str | None = None
+    KEYCLOAK_JWKS_URL: str | None = Field(
+        default=None,
+        validation_alias=AliasChoices("KEYCLOAK_JWKS_URL", "keycloak_jwks_url"),
+    )
     OAUTH_REDIRECT_URL: str
     OAUTH_CALLBACK_URL: str
     OAUTH_UNAUTHORIZED_REDIRECT_URL: str = "http://localhost:8080/hub/unauthorized"
