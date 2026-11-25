@@ -10,7 +10,6 @@ __all__ = [
     "chat",
     "contents",
     "errors",
-    "flowcept",
     "healthcheck",
     "jupyter_servers",
     "jupyterhub",

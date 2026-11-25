@@ -151,7 +151,6 @@ export type ChatMessage = {
   messageType: 'text' | 'rich'
   status: ChatMessageStatus
   display: boolean
-  flowcept?: boolean
   metadata?: Record<string, unknown>
 }
 

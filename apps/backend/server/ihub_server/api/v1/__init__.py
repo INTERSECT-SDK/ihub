@@ -8,7 +8,6 @@ from .endpoints import (
     capabilities,
     chat,
     contents,
-    flowcept,
     general,
     jupyter_servers,
     jupyterhub,
@@ -29,7 +28,6 @@ router.include_router(capabilities.router, prefix="/capabilities", tags=["Capabi
 router.include_router(campaign.router, prefix="/campaign", tags=["Campaign"])
 router.include_router(chat.router, prefix="/chat", tags=["Chat"])
 router.include_router(contents.router, prefix="/contents", tags=["Contents"])
-router.include_router(flowcept.router, prefix="/flowcept", tags=["Flowcept"])
 router.include_router(general.router)
 router.include_router(jupyter_servers.router, prefix="/jupyter", tags=["Jupyter Servers"])
 router.include_router(jupyterhub.router, prefix="/jupyterhub", tags=["JupyterHub"])

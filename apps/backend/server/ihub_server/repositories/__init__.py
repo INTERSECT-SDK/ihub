@@ -6,7 +6,6 @@ __all__ = [
     "brokers",
     "campaign_runs",
     "capabilities",
-    "flowcept_messages",
     "jupyter_servers",
     "lifecycle_messages",
     "llm",

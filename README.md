@@ -50,6 +50,21 @@ configure it for your environment. Obtain deployment secrets through an
 approved secret-management channel; never email or commit an environment file.
 For setup support, contact [ihub-support@ornl.gov](mailto:ihub-support@ornl.gov).
 
+The backend and Compose stacks accept the legacy OAuth endpoint names
+`keycloak_authorize_url`, `keycloak_token_url`, and `keycloak_jwks_url` as
+fallbacks for `KEYCLOAK_AUTHORIZE_URL`, `KEYCLOAK_TOKEN_URL`, and
+`KEYCLOAK_JWKS_URL`, respectively. Compose also accepts the legacy spelling
+`JUYTER_HUB_ADMIN_TOKEN` as a fallback for `JUPYTER_HUB_ADMIN_TOKEN`. Use the
+canonical uppercase names in new configurations. Within a settings source, a
+nonempty canonical value takes precedence over its legacy name; empty values
+are treated as unset. Normal environment and `.env` loading rules are unchanged.
+For example, a backend process environment value for `keycloak_token_url`
+overrides a `KEYCLOAK_TOKEN_URL` value in `.env`.
+If neither name has a nonempty value, each stack keeps its existing defaults.
+The full-development stack keeps its fixed internal backend OAuth endpoints;
+its JupyterHub endpoints use the configured values. Legacy names remain
+supported with no removal deadline.
+
 Project file uploads are limited to 10 MiB by default. To change the limit, set
 `PROJECT_FILE_UPLOAD_MAX_BYTES` to a positive integer representing the maximum
 raw file size in bytes. Nginx derives a JSON/base64 request-envelope limit from

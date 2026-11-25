@@ -91,10 +91,23 @@ def test_seed_broker_connection_returns_configured_values(monkeypatch):
     )
 
 
+_KEYCLOAK_URLS = (
+    "KEYCLOAK_AUTHORIZE_URL",
+    "KEYCLOAK_TOKEN_URL",
+    "KEYCLOAK_JWKS_URL",
+)
+
+
+@pytest.fixture(autouse=True)
+def clear_legacy_keycloak_urls(monkeypatch):
+    for name in _KEYCLOAK_URLS:
+        monkeypatch.delenv(name.lower(), raising=False)
+
+
 _KEYCLOAK_SETTINGS = (
-    "keycloak_authorize_url",
-    "keycloak_token_url",
-    "keycloak_jwks_url",
+    "KEYCLOAK_AUTHORIZE_URL",
+    "KEYCLOAK_TOKEN_URL",
+    "KEYCLOAK_JWKS_URL",
     "SCOPE",
     "CLIENT_ID",
     "CLIENT_SECRET",
@@ -109,12 +122,135 @@ def test_keycloak_settings_are_optional_in_dev_bypass(monkeypatch):
     settings = Settings(_env_file=None)
 
     assert settings.CLIENT_ID is None
+    for name in _KEYCLOAK_URLS:
+        assert getattr(settings, name) is None
 
 
 def test_oauth_mode_requires_keycloak_settings(monkeypatch):
     monkeypatch.setenv("AUTH_MODE", "oauth")
     monkeypatch.delenv("CLIENT_SECRET", raising=False)
-    monkeypatch.delenv("keycloak_jwks_url", raising=False)
+    monkeypatch.delenv("KEYCLOAK_JWKS_URL", raising=False)
 
-    with pytest.raises(ValidationError, match="CLIENT_SECRET, keycloak_jwks_url"):
+    with pytest.raises(ValidationError, match="CLIENT_SECRET, KEYCLOAK_JWKS_URL"):
         Settings(_env_file=None)
+
+
+@pytest.mark.parametrize("source", ["environment", "dotenv"])
+@pytest.mark.parametrize(
+    "scenario",
+    ["legacy", "canonical", "mixed", "conflict", "empty_canonical"],
+)
+def test_keycloak_url_aliases(monkeypatch, tmp_path, source, scenario):
+    monkeypatch.setenv("AUTH_MODE", "oauth")
+    variables = {}
+    expected = {}
+    for index, name in enumerate(_KEYCLOAK_URLS):
+        # Remove conftest's canonical values so legacy-only and dotenv cases
+        # actually exercise the aliases rather than inheriting valid settings.
+        monkeypatch.delenv(name, raising=False)
+        legacy_value = f"https://legacy.example.test/{name.lower()}"
+        canonical_value = f"https://canonical.example.test/{name.lower()}"
+        if scenario in {"legacy", "conflict", "empty_canonical"} or (
+            scenario == "mixed" and index % 2 == 0
+        ):
+            variables[name.lower()] = legacy_value
+            expected[name] = legacy_value
+        if scenario in {"canonical", "conflict"} or (scenario == "mixed" and index % 2 == 1):
+            variables[name] = canonical_value
+            expected[name] = canonical_value
+        if scenario == "empty_canonical":
+            variables[name] = ""
+
+    env_file = None
+    if source == "environment":
+        for name, value in variables.items():
+            monkeypatch.setenv(name, value)
+    else:
+        env_file = tmp_path / ".env"
+        env_file.write_text("\n".join(f"{name}={value}" for name, value in variables.items()))
+
+    settings = Settings(_env_file=env_file)
+
+    for name, value in expected.items():
+        assert getattr(settings, name) == value
+
+
+@pytest.mark.parametrize("source", ["environment", "dotenv"])
+@pytest.mark.parametrize("name", _KEYCLOAK_URLS)
+def test_oauth_rejects_empty_keycloak_url_aliases(monkeypatch, tmp_path, source, name):
+    monkeypatch.setenv("AUTH_MODE", "oauth")
+    monkeypatch.delenv(name, raising=False)
+    env_file = None
+    if source == "environment":
+        monkeypatch.setenv(name, "")
+        monkeypatch.setenv(name.lower(), "")
+    else:
+        env_file = tmp_path / ".env"
+        env_file.write_text(f"{name}=\n{name.lower()}=\n")
+
+    with pytest.raises(ValidationError, match=name):
+        Settings(_env_file=env_file)
+
+
+@pytest.fixture
+def isolated_keycloak_urls(monkeypatch):
+    monkeypatch.setenv("AUTH_MODE", "dev_bypass")
+    for name in _KEYCLOAK_URLS:
+        monkeypatch.delenv(name, raising=False)
+        monkeypatch.delenv(name.lower(), raising=False)
+
+
+@pytest.mark.usefixtures("isolated_keycloak_urls")
+@pytest.mark.parametrize("name", _KEYCLOAK_URLS)
+@pytest.mark.parametrize("environment_legacy", [False, True])
+@pytest.mark.parametrize("dotenv_legacy", [False, True])
+@pytest.mark.parametrize("environment_value", ["https://environment.example.test", ""])
+def test_keycloak_environment_overrides_dotenv(
+    monkeypatch, tmp_path, name, environment_legacy, dotenv_legacy, environment_value
+):
+    environment_name = name.lower() if environment_legacy else name
+    dotenv_name = name.lower() if dotenv_legacy else name
+    dotenv_value = "https://dotenv.example.test"
+    env_file = tmp_path / ".env"
+    env_file.write_text(f"{dotenv_name}={dotenv_value}\n")
+    monkeypatch.setenv(environment_name, environment_value)
+
+    settings = Settings(_env_file=env_file)
+
+    assert getattr(settings, name) == (environment_value or dotenv_value)
+
+
+@pytest.mark.usefixtures("isolated_keycloak_urls")
+@pytest.mark.parametrize("name", _KEYCLOAK_URLS)
+@pytest.mark.parametrize("constructor_legacy", [False, True])
+@pytest.mark.parametrize("environment_legacy", [False, True])
+def test_keycloak_constructor_overrides_environment(
+    monkeypatch, name, constructor_legacy, environment_legacy
+):
+    constructor_name = name.lower() if constructor_legacy else name
+    environment_name = name.lower() if environment_legacy else name
+    constructor_value = "https://constructor.example.test"
+    monkeypatch.setenv(environment_name, "https://environment.example.test")
+
+    settings = Settings(_env_file=None, **{constructor_name: constructor_value})
+
+    assert getattr(settings, name) == constructor_value
+
+
+@pytest.mark.usefixtures("isolated_keycloak_urls")
+@pytest.mark.parametrize("name", _KEYCLOAK_URLS)
+@pytest.mark.parametrize("dotenv_legacy", [False, True])
+@pytest.mark.parametrize("secret_legacy", [False, True])
+def test_keycloak_dotenv_overrides_secrets(tmp_path, name, dotenv_legacy, secret_legacy):
+    dotenv_name = name.lower() if dotenv_legacy else name
+    secret_name = name.lower() if secret_legacy else name
+    dotenv_value = "https://dotenv.example.test"
+    env_file = tmp_path / ".env"
+    env_file.write_text(f"{dotenv_name}={dotenv_value}\n")
+    secrets_dir = tmp_path / "secrets"
+    secrets_dir.mkdir()
+    (secrets_dir / secret_name).write_text("https://secret.example.test")
+
+    settings = Settings(_env_file=env_file, _secrets_dir=secrets_dir)
+
+    assert getattr(settings, name) == dotenv_value

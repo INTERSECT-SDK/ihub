@@ -1,4 +1,4 @@
-"""Public URL regressions; run with unittest discover -s tests/config -v."""
+"""Compose settings regressions; run with unittest discover -s tests/config -v."""
 
 import json
 import os
@@ -20,6 +20,20 @@ PUBLIC_URLS = {
         "JUPYTER_OAUTH_CALLBACK_URL": "/ijupyterhub/hub/oauth_callback",
     },
 }
+COMPOSE_VARIANTS = (
+    "docker-compose.dev.yml",
+    "docker-compose.dev-full.yml",
+    "docker-compose.ghcr.yml",
+    "docker-compose.prod.yml",
+)
+KEYCLOAK_ENDPOINTS = {
+    "KEYCLOAK_AUTHORIZE_URL": "auth",
+    "KEYCLOAK_TOKEN_URL": "token",
+    "KEYCLOAK_JWKS_URL": "certs",
+}
+INTERNAL_KEYCLOAK_URL = (
+    "http://ihub-keycloak:8080/auth/realms/master/protocol/openid-connect"
+)
 
 
 def isolated_environment() -> dict[str, str]:
@@ -88,6 +102,105 @@ class ComposePublicURLTests(unittest.TestCase):
         )
         self.assertEqual(services["server"]["environment"]["AUTH_MODE"], "dev_bypass")
 
+    def assert_compatible_settings(
+        self,
+        services: dict,
+        compose: str,
+        expected: dict[str, str],
+    ) -> None:
+        hub_env = services["ihub-jupyterhub"]["environment"]
+        for name in ("KEYCLOAK_AUTHORIZE_URL", "KEYCLOAK_TOKEN_URL"):
+            self.assertEqual(
+                hub_env[name.replace("KEYCLOAK_", "OAUTH_")], expected[name]
+            )
+        token = expected["JUPYTER_HUB_ADMIN_TOKEN"]
+        self.assertEqual(hub_env["JH_ADMIN_TOKEN"], token)
+        if "server" in services:
+            server_env = services["server"]["environment"]
+            self.assertEqual(server_env["JH_ADMIN_TOKEN"], token)
+            for name, endpoint in KEYCLOAK_ENDPOINTS.items():
+                if compose == "docker-compose.dev-full.yml":
+                    value = f"{INTERNAL_KEYCLOAK_URL}/{endpoint}"
+                elif compose == "docker-compose.ghcr.yml" and not expected[name]:
+                    value = f"{INTERNAL_KEYCLOAK_URL}/{endpoint}"
+                else:
+                    value = expected[name]
+                self.assertEqual(server_env[name], value)
+
+    def test_legacy_and_canonical_settings(self) -> None:
+        names = tuple(KEYCLOAK_ENDPOINTS) + ("JUPYTER_HUB_ADMIN_TOKEN",)
+        with tempfile.TemporaryDirectory() as directory:
+            directory = Path(directory)
+            # Compose config only resolves these paths; no TLS service is started.
+            cert = directory / "cert.pem"
+            key = directory / "private.key"
+            cert.touch()
+            key.touch()
+            tls = {
+                "NGINX_SERVER_NAME": "ihub.example.test",
+                "TLS_CERT_FILE": str(cert),
+                "TLS_KEY_FILE": str(key),
+            }
+            for scenario in (
+                "legacy",
+                "canonical",
+                "mixed",
+                "conflict",
+                "empty_canonical",
+                "absent",
+                "empty",
+            ):
+                variables = {}
+                expected = {}
+                for index, name in enumerate(names):
+                    legacy = (
+                        "JUYTER_HUB_ADMIN_TOKEN"
+                        if name == "JUPYTER_HUB_ADMIN_TOKEN"
+                        else name.lower()
+                    )
+                    expected[name] = ""
+                    if scenario in {
+                        "legacy",
+                        "conflict",
+                        "empty_canonical",
+                    } or (scenario == "mixed" and index % 2 == 0):
+                        variables[legacy] = f"https://legacy.example.test/{name}"
+                        expected[name] = variables[legacy]
+                    if scenario in {"canonical", "conflict"} or (
+                        scenario == "mixed" and index % 2 == 1
+                    ):
+                        variables[name] = f"https://canonical.example.test/{name}"
+                        expected[name] = variables[name]
+                    if scenario in {"empty_canonical", "empty"}:
+                        variables[name] = ""
+                    if scenario == "empty":
+                        variables[legacy] = ""
+                for compose in COMPOSE_VARIANTS:
+                    resolved = expected.copy()
+                    if (
+                        compose == "docker-compose.ghcr.yml"
+                        and not resolved["JUPYTER_HUB_ADMIN_TOKEN"]
+                    ):
+                        resolved["JUPYTER_HUB_ADMIN_TOKEN"] = (
+                            "ihub_jupyter_hub_secret_key"
+                        )
+                    for source in ("shell", "file"):
+                        with self.subTest(
+                            scenario=scenario, compose=compose, source=source
+                        ):
+                            services = self.resolve(
+                                directory,
+                                tls | variables if source == "shell" else tls,
+                                compose=compose,
+                                env_text=""
+                                if source == "shell"
+                                else "\n".join(
+                                    f"{name}={value}"
+                                    for name, value in variables.items()
+                                ),
+                            )
+                            self.assert_compatible_settings(services, compose, resolved)
+
     def test_defaults_and_copied_example_follow_port(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
             for example in (False, True):
@@ -151,7 +264,10 @@ class ComposePublicURLTests(unittest.TestCase):
 
     def test_existing_development_variants_resolve(self) -> None:
         with tempfile.TemporaryDirectory() as directory:
-            for compose in ("docker-compose.dev.yml", "docker-compose.dev-full.yml"):
+            for compose in (
+                "docker-compose.dev.yml",
+                "docker-compose.dev-full.yml",
+            ):
                 with self.subTest(compose=compose):
                     services = self.resolve(
                         Path(directory), {}, example=True, compose=compose

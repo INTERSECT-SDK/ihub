@@ -80,19 +80,16 @@ services:
       REDIS_DB: 0
       REDIS_PROTOCOL: 3
       REDIS_DECODE_RESPONSES: True
-      MQ_URI: ${MQ_URI:-redis://ihub-redis:6379}
-      KVDB_URI: ${KVDB_URI:-redis://ihub-redis:6379}
-      JH_ADMIN_TOKEN: ${JUYTER_HUB_ADMIN_TOKEN}
+      JH_ADMIN_TOKEN: ${JUPYTER_HUB_ADMIN_TOKEN:-${JUYTER_HUB_ADMIN_TOKEN:-}}
       JH_HOST: ${JUPYTER_PUBLIC_URL}
       SESSION_SECRET: ${SESSION_SECRET}
       SCOPE: ${SCOPE}
-      auth_redirect_url: ${auth_redirect_url}
       CLIENT_ID: ${CLIENT_ID}
       CLIENT_SECRET: ${CLIENT_SECRET}
-      keycloak_authorize_url: ${keycloak_authorize_url}
-      keycloak_token_url: ${keycloak_token_url}
+      KEYCLOAK_AUTHORIZE_URL: ${KEYCLOAK_AUTHORIZE_URL:-${keycloak_authorize_url:-}}
+      KEYCLOAK_TOKEN_URL: ${KEYCLOAK_TOKEN_URL:-${keycloak_token_url:-}}
       OAUTH_USERDATA_URL: ${OAUTH_USERDATA_URL}
-      keycloak_jwks_url: ${keycloak_jwks_url}
+      KEYCLOAK_JWKS_URL: ${KEYCLOAK_JWKS_URL:-${keycloak_jwks_url:-}}
       OAUTH_CALLBACK_URL: ${OAUTH_CALLBACK_URL}
       OAUTH_REDIRECT_URL: ${OAUTH_REDIRECT_URL}
       OAUTH_UNAUTHORIZED_REDIRECT_URL: ${OAUTH_UNAUTHORIZED_REDIRECT_URL}
@@ -188,8 +185,8 @@ services:
       OAUTH_CLIENT_ID: ${CLIENT_ID}
       OAUTH_CLIENT_SECRET: ${CLIENT_SECRET}
       SCOPE: ${SCOPE}
-      OAUTH_AUTHORIZE_URL: ${keycloak_authorize_url}
-      OAUTH_TOKEN_URL: ${keycloak_token_url}
+      OAUTH_AUTHORIZE_URL: ${KEYCLOAK_AUTHORIZE_URL:-${keycloak_authorize_url:-}}
+      OAUTH_TOKEN_URL: ${KEYCLOAK_TOKEN_URL:-${keycloak_token_url:-}}
       OAUTH_USERDATA_URL: ${OAUTH_USERDATA_URL}
       JUPYTER_OAUTH_CALLBACK_URL: ${JUPYTER_OAUTH_CALLBACK_URL}
       JUPYTER_PUBLIC_URL: ${JUPYTER_PUBLIC_URL}
@@ -198,7 +195,7 @@ services:
       JUPYTER_SECURE_COOKIES: ${JUPYTER_SECURE_COOKIES}
       AUTH_MODE: oauth
       ENVIRONMENT: production
-      JH_ADMIN_TOKEN: ${JUYTER_HUB_ADMIN_TOKEN}
+      JH_ADMIN_TOKEN: ${JUPYTER_HUB_ADMIN_TOKEN:-${JUYTER_HUB_ADMIN_TOKEN:-}}
 
   mcp:
     container_name: ihub-mcp
@@ -247,15 +244,6 @@ services:
             - driver: nvidia
               count: all # Use all available GPUs
               capabilities: [gpu]
-
-  # Can turn off when using remote S3M Flowcept broker
-  # flowcept_redis:
-  #  container_name: flowcept_redis
-  #  image: redis
-  #  ports:
-  #    - 6379:6379
-  #  networks:
-  #    - internal
 
 # Define a network, which allows containers to communicate
 # with each other, by using their container name as a hostname

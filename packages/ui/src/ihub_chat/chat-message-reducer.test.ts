@@ -28,7 +28,6 @@ const userMessage: ChatMessage = {
   messageType: 'text',
   status: 'complete',
   display: true,
-  flowcept: false,
 }
 
 test('chatMessageReducer appends user messages and updates the chat timestamp', () => {

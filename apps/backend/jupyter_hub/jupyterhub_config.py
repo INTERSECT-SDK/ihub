@@ -19,7 +19,9 @@ c.JupyterHub.base_url = "/ijupyterhub"
 c.JupyterHub.trust_xheaders = True
 
 c.JupyterHub.hub_bind_url = "http://0.0.0.0:8081"
-c.JupyterHub.hub_connect_url = "http://ihub-jupyterhub:8081"
+c.JupyterHub.hub_connect_url = os.environ.get(
+    "JUPYTERHUB_HUB_CONNECT_URL", "http://ihub-jupyterhub:8081"
+)
 c.JupyterHub.public_url = os.environ.get(
     "JUPYTER_PUBLIC_URL", "http://localhost:8080/ijupyterhub"
 )

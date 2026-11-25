@@ -46,9 +46,6 @@ WORKDIR /app
 COPY --from=builder /app/.venv /app/.venv
 COPY ihub_server ihub_server
 
-# Currently needed for Agentic AI Demo
-COPY configs configs
-
 # this is strictly for supporting migrations at runtime
 COPY migrations migrations
 COPY alembic.ini alembic.ini

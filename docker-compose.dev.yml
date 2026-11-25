@@ -98,8 +98,8 @@ services:
       OAUTH_CLIENT_ID: ${CLIENT_ID}
       OAUTH_CLIENT_SECRET: ${CLIENT_SECRET}
       SCOPE: ${SCOPE}
-      OAUTH_AUTHORIZE_URL: ${keycloak_authorize_url}
-      OAUTH_TOKEN_URL: ${keycloak_token_url}
+      OAUTH_AUTHORIZE_URL: ${KEYCLOAK_AUTHORIZE_URL:-${keycloak_authorize_url:-}}
+      OAUTH_TOKEN_URL: ${KEYCLOAK_TOKEN_URL:-${keycloak_token_url:-}}
       OAUTH_USERDATA_URL: ${OAUTH_USERDATA_URL}
       JUPYTER_OAUTH_CALLBACK_URL: ${JUPYTER_OAUTH_CALLBACK_URL}
       JUPYTER_PUBLIC_URL: ${JUPYTER_PUBLIC_URL}
@@ -110,7 +110,7 @@ services:
       ENVIRONMENT: ${ENVIRONMENT:-development}
       DEV_AUTH_EMAIL: ${DEV_AUTH_EMAIL:-dev.user@example.com}
       DEV_AUTH_NAME: ${DEV_AUTH_NAME:-Local Dev User}
-      JH_ADMIN_TOKEN: ${JUYTER_HUB_ADMIN_TOKEN}
+      JH_ADMIN_TOKEN: ${JUPYTER_HUB_ADMIN_TOKEN:-${JUYTER_HUB_ADMIN_TOKEN:-}}
 
   ihub-keycloak:
     container_name: ihub-keycloak

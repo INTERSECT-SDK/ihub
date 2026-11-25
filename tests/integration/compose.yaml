@@ -115,9 +115,9 @@ services:
       SCOPE: openid email
       CLIENT_ID: ihub
       CLIENT_SECRET: ihub-it-client-secret
-      keycloak_authorize_url: http://localhost:${IT_PORT:-18080}/auth/realms/ihub/protocol/openid-connect/auth
-      keycloak_token_url: http://keycloak:8080/auth/realms/ihub/protocol/openid-connect/token
-      keycloak_jwks_url: http://keycloak:8080/auth/realms/ihub/protocol/openid-connect/certs
+      KEYCLOAK_AUTHORIZE_URL: http://localhost:${IT_PORT:-18080}/auth/realms/ihub/protocol/openid-connect/auth
+      KEYCLOAK_TOKEN_URL: http://keycloak:8080/auth/realms/ihub/protocol/openid-connect/token
+      KEYCLOAK_JWKS_URL: http://keycloak:8080/auth/realms/ihub/protocol/openid-connect/certs
       OAUTH_CALLBACK_URL: http://localhost:${IT_PORT:-18080}/api/v1/auth/callback
       OAUTH_REDIRECT_URL: http://localhost:${IT_PORT:-18080}/hub/auth
       OAUTH_UNAUTHORIZED_REDIRECT_URL: http://localhost:${IT_PORT:-18080}/hub/unauthorized
