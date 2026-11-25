@@ -1,16 +1,43 @@
 from dataclasses import dataclass
-from typing import Literal, Self
+from typing import Any, Literal, Self
 
 from intersect_sdk_common import ControlProvider
 from pydantic import AliasChoices, Field, PositiveInt, model_validator
+from pydantic.fields import FieldInfo
 from pydantic_settings import (
     BaseSettings,
+    PydanticBaseSettingsSource,
     SettingsConfigDict,
 )
 
 LogLevel = Literal["CRITICAL", "FATAL", "ERROR", "WARNING", "WARN", "INFO", "DEBUG"]
 EnvironmentName = Literal["development", "staging", "production"]
 AuthMode = Literal["oauth", "dev_bypass"]
+
+
+class _OAuthAliasSettingsSource(PydanticBaseSettingsSource):
+    """Normalize OAuth aliases while retaining the wrapped source's loading rules."""
+
+    def __init__(self, source: PydanticBaseSettingsSource) -> None:
+        super().__init__(source.settings_cls)
+        self._source = source
+
+    def get_field_value(self, field: FieldInfo, field_name: str) -> tuple[Any, str, bool]:
+        return self._source.get_field_value(field, field_name)
+
+    def __call__(self) -> dict[str, Any]:
+        values = self._source()
+        # Normalize before merging so alias spelling cannot override source priority.
+        for name in (
+            "KEYCLOAK_AUTHORIZE_URL",
+            "KEYCLOAK_TOKEN_URL",
+            "KEYCLOAK_JWKS_URL",
+        ):
+            legacy_name = name.lower()
+            if legacy_name in values:
+                legacy_value = values.pop(legacy_name)
+                values.setdefault(name, legacy_value)
+        return values
 
 
 @dataclass(frozen=True)
@@ -85,6 +112,23 @@ class Settings(BaseSettings):
     OAUTH_REDIRECT_URL: str
     OAUTH_CALLBACK_URL: str
     OAUTH_UNAUTHORIZED_REDIRECT_URL: str = "http://localhost:8080/hub/unauthorized"
+
+    @classmethod
+    def settings_customise_sources(
+        cls,
+        settings_cls: type[BaseSettings],
+        init_settings: PydanticBaseSettingsSource,
+        env_settings: PydanticBaseSettingsSource,
+        dotenv_settings: PydanticBaseSettingsSource,
+        file_secret_settings: PydanticBaseSettingsSource,
+    ) -> tuple[PydanticBaseSettingsSource, ...]:
+        """Preserve source priority across canonical and legacy OAuth names."""
+        return tuple(
+            _OAuthAliasSettingsSource(source)
+            for source in super().settings_customise_sources(
+                settings_cls, init_settings, env_settings, dotenv_settings, file_secret_settings
+            )
+        )
 
     def seed_broker_connection(self) -> SeedBrokerConnection:
         """Return the seed broker connection settings, or raise if any are unset."""

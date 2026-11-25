@@ -58,6 +58,8 @@ fallbacks for `KEYCLOAK_AUTHORIZE_URL`, `KEYCLOAK_TOKEN_URL`, and
 canonical uppercase names in new configurations. Within a settings source, a
 nonempty canonical value takes precedence over its legacy name; empty values
 are treated as unset. Normal environment and `.env` loading rules are unchanged.
+For example, a backend process environment value for `keycloak_token_url`
+overrides a `KEYCLOAK_TOKEN_URL` value in `.env`.
 If neither name has a nonempty value, each stack keeps its existing defaults.
 The full-development stack keeps its fixed internal backend OAuth endpoints;
 its JupyterHub endpoints use the configured values. Legacy names remain

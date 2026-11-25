@@ -190,3 +190,67 @@ def test_oauth_rejects_empty_keycloak_url_aliases(monkeypatch, tmp_path, source,
 
     with pytest.raises(ValidationError, match=name):
         Settings(_env_file=env_file)
+
+
+@pytest.fixture
+def isolated_keycloak_urls(monkeypatch):
+    monkeypatch.setenv("AUTH_MODE", "dev_bypass")
+    for name in _KEYCLOAK_URLS:
+        monkeypatch.delenv(name, raising=False)
+        monkeypatch.delenv(name.lower(), raising=False)
+
+
+@pytest.mark.usefixtures("isolated_keycloak_urls")
+@pytest.mark.parametrize("name", _KEYCLOAK_URLS)
+@pytest.mark.parametrize("environment_legacy", [False, True])
+@pytest.mark.parametrize("dotenv_legacy", [False, True])
+@pytest.mark.parametrize("environment_value", ["https://environment.example.test", ""])
+def test_keycloak_environment_overrides_dotenv(
+    monkeypatch, tmp_path, name, environment_legacy, dotenv_legacy, environment_value
+):
+    environment_name = name.lower() if environment_legacy else name
+    dotenv_name = name.lower() if dotenv_legacy else name
+    dotenv_value = "https://dotenv.example.test"
+    env_file = tmp_path / ".env"
+    env_file.write_text(f"{dotenv_name}={dotenv_value}\n")
+    monkeypatch.setenv(environment_name, environment_value)
+
+    settings = Settings(_env_file=env_file)
+
+    assert getattr(settings, name) == (environment_value or dotenv_value)
+
+
+@pytest.mark.usefixtures("isolated_keycloak_urls")
+@pytest.mark.parametrize("name", _KEYCLOAK_URLS)
+@pytest.mark.parametrize("constructor_legacy", [False, True])
+@pytest.mark.parametrize("environment_legacy", [False, True])
+def test_keycloak_constructor_overrides_environment(
+    monkeypatch, name, constructor_legacy, environment_legacy
+):
+    constructor_name = name.lower() if constructor_legacy else name
+    environment_name = name.lower() if environment_legacy else name
+    constructor_value = "https://constructor.example.test"
+    monkeypatch.setenv(environment_name, "https://environment.example.test")
+
+    settings = Settings(_env_file=None, **{constructor_name: constructor_value})
+
+    assert getattr(settings, name) == constructor_value
+
+
+@pytest.mark.usefixtures("isolated_keycloak_urls")
+@pytest.mark.parametrize("name", _KEYCLOAK_URLS)
+@pytest.mark.parametrize("dotenv_legacy", [False, True])
+@pytest.mark.parametrize("secret_legacy", [False, True])
+def test_keycloak_dotenv_overrides_secrets(tmp_path, name, dotenv_legacy, secret_legacy):
+    dotenv_name = name.lower() if dotenv_legacy else name
+    secret_name = name.lower() if secret_legacy else name
+    dotenv_value = "https://dotenv.example.test"
+    env_file = tmp_path / ".env"
+    env_file.write_text(f"{dotenv_name}={dotenv_value}\n")
+    secrets_dir = tmp_path / "secrets"
+    secrets_dir.mkdir()
+    (secrets_dir / secret_name).write_text("https://secret.example.test")
+
+    settings = Settings(_env_file=env_file, _secrets_dir=secrets_dir)
+
+    assert getattr(settings, name) == dotenv_value
